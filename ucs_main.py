@@ -4,7 +4,7 @@ import heapq
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 
-def CreateGrid(rows, columns):
+def CreateGridSameCost(rows, columns):
     # Creates a 2D Array while assuming every cost to enter the node is 1.
     grid = []
     for x in range(rows):
@@ -57,7 +57,7 @@ def VisualizeGrid(start_node, goal_node, grid, path):
     visual_grid[start_node.x][start_node.y] = 2
     visual_grid[goal_node.x][goal_node.y] = 4
 
-    plt.figure(figsize=(8, 8))
+    plt.figure(figsize=(9, 9))
     plt.imshow(visual_grid, cmap = cmap, origin = 'lower')
     
     plt.xticks(range(columns))
@@ -71,12 +71,12 @@ def VisualizeGrid(start_node, goal_node, grid, path):
     plt.show()
 
 def GetNeighbors4n(grid, node):
-    directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+    directions = [(0, 1, 1), (0, -1, 1), (1, 0, 1), (-1, 0, 1)]
     rows = len(grid)
     columns = len(grid[0])
     neighbours = []
     
-    for dx, dy in directions:
+    for dx, dy, dc in directions:
         nx = node.x + dx
         ny = node.y + dy
         # Bound Checking
@@ -154,7 +154,7 @@ def UCSPathFind(start_node, goal_node, grid):
     return None
 
 def main():
-    grid = CreateGrid(8, 8)
+    grid = CreateGridSameCost(9, 9)
     GenerateObstaclesTest1(grid)
     #ShowGridText(grid)
     

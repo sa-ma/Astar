@@ -1,6 +1,9 @@
 from UCS_Node import UCS_Node
 import heapq
 
+import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
+
 def CreateGrid(rows, columns):
     # Creates a 2D Array while assuming every cost to enter the node is 1.
     grid = []
@@ -13,6 +16,8 @@ def CreateGrid(rows, columns):
     return grid
 
 def GenerateObstaclesTest1(grid):
+    # In the 2D-grid Array, [Rows][Columns] = [Y-Axis][X-Axis]
+    
     grid[0][7].isWalkable = False
     grid[1][7].isWalkable = False
     grid[3][2].isWalkable = False
@@ -21,7 +26,6 @@ def GenerateObstaclesTest1(grid):
     grid[6][6].isWalkable = False
     grid[6][5].isWalkable = False
     #grid[0][0].isWalkable = False
-    
 
 def ShowGridText(grid):
     # The Reverse Function ensures that (0, 0) starts at the bottom left.
@@ -29,7 +33,43 @@ def ShowGridText(grid):
     # Column is the X-Axis
     for row in reversed(grid):
         print(" ".join("#" if not node.isWalkable else "." for node in row))
-        
+
+def VisualizeGrid(start_node, goal_node, grid, path):
+    rows = len(grid)
+    columns = len(grid[0])
+    
+    cmap = ListedColormap(["black", "white", "green", "blue", "red"])
+    
+    visual_grid = [[0 for _ in range(columns)] for _ in range(rows)]
+    
+    for x in range(rows):
+        for y in range(columns):
+            if(grid[x][y].isWalkable == False):
+                visual_grid[x][y] = 0
+            else:
+                visual_grid[x][y] = 1
+    
+    # Make path found Blue. (MAKE SURE PATH COLOR IS SET FIRST SO THAT START AND GOAL NODES ARE VISIBLE)
+    for node in path:
+        visual_grid[node.x][node.y] = 3
+
+    # Show Start Node and Goal Node.
+    visual_grid[start_node.x][start_node.y] = 2
+    visual_grid[goal_node.x][goal_node.y] = 4
+
+    plt.figure(figsize=(8, 8))
+    plt.imshow(visual_grid, cmap = cmap, origin = 'lower')
+    
+    plt.xticks(range(columns))
+    plt.yticks(range(rows))
+    plt.grid(which = "both", color = "black", linestyle = "-", linewidth = 0.5)
+    
+    plt.xlim(-0.5, columns - 0.5)
+    plt.ylim(-0.5, rows - 0.5)
+    
+    plt.title(f"Unform Cost Search")
+    plt.show()
+
 def GetNeighbors4n(grid, node):
     directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
     rows = len(grid)
@@ -78,10 +118,6 @@ def UCSPathFind(start_node, goal_node, grid):
         
         for neighbours in GetNeighbors4n(grid, parent_node):
             
-            # Skip non-walkable neighbours.
-            if not neighbours.isWalkable:
-                continue
-            
             new_cost = parent_node.cost + neighbours.cost
             
             is_in_open_set = False
@@ -120,7 +156,7 @@ def UCSPathFind(start_node, goal_node, grid):
 def main():
     grid = CreateGrid(8, 8)
     GenerateObstaclesTest1(grid)
-    ShowGridText(grid)
+    #ShowGridText(grid)
     
     start_node = grid[0][0]
     goal_node = grid[5][5]
@@ -128,6 +164,7 @@ def main():
     
     if path:
         print("Path found:", path)
+        VisualizeGrid(start_node, goal_node, grid, path)
     else:
         print("No path found.")
     

@@ -9,8 +9,7 @@ class UCS_Node:
         
     def __repr__(self):
         return f"Node({self.x}, {self.y}, cost = {self.cost})"
-        #return f"Node({self.x}, {self.y}, isWalkable = {self.isWalkable}, cost = {self.cost})"
     
-    # A less than function made so that it will work with heapq.
+    # A less-than function made so that it will work with heapq.
     def __lt__(self, other):
         return self.cost < other.cost

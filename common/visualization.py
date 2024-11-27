@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 
-def visualize_grid(start_node, goal_node, grid, path):
+def visualize_grid(start_node, goal_node, grid, path, total_path_cost):
     rows = len(grid)
     columns = len(grid[0])
     
@@ -29,5 +29,6 @@ def visualize_grid(start_node, goal_node, grid, path):
     plt.grid(which="both", color="black", linestyle="-", linewidth=0.5)
     plt.xlim(-0.5, columns - 0.5)
     plt.ylim(-0.5, rows - 0.5)
-    plt.title("Pathfinding Visualization")
+    plt.suptitle("Pathfinding Visualization", fontsize = 16)
+    plt.title(f"Total Path Cost: {total_path_cost}", fontsize = 10, loc = 'center') 
     plt.show()

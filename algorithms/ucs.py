@@ -41,12 +41,15 @@ def ucs_pathfind_graph_traversal(start_node, goal_node, grid):
         
         closed_set[parent_node.state] = parent_node
         
-        for neighbor in get_neighbors(grid, parent_node):
-            new_cost = parent_node.cost + neighbor.cost
-            if neighbor.state not in closed_set:
-                neighbor.cost = new_cost
-                neighbor.parent = parent_node
-                heapq.heappush(open_set, (neighbor.cost, neighbor))
+        for neighbour in get_neighbors(grid, parent_node):
+            new_cost = parent_node.cost + neighbour.cost
+            if neighbour.state not in closed_set:
+                # This if statement with 'in_open_set' ensures that the neighbour nodes already in the open_set will have an updated node if a shorter/lower cost path is found.
+                in_open_set = any(neighbour.state == node[1].state for node in open_set)
+                if(not in_open_set or new_cost < neighbour.cost):
+                    neighbour.cost = new_cost
+                    neighbour.parent = parent_node
+                    heapq.heappush(open_set, (neighbour.cost, neighbour))
     
     return None
 

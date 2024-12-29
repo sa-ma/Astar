@@ -18,3 +18,7 @@ def generate_obstacles(grid, obstacle_count):
 
     for x, y in obstacles:
         grid[x][y].is_walkable = False
+    
+def generate_fixed_obstacles(grid, obstacles):
+    for x, y in obstacles:
+        grid[x][y].is_walkable = False

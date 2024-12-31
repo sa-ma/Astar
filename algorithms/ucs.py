@@ -1,13 +1,12 @@
 import heapq
-from common.grid import create_grid, generate_obstacles, generate_fixed_obstacles
+from common.grid import create_grid, generate_obstacles, read_grid
 from common.visualization import visualize_grid
 from common.node import Node
 import time
 
-def get_neighbors(grid, node):
+def get_neighbors(grid, node, grid_shape):
     directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
-    rows = len(grid)
-    columns = len(grid[0])
+    rows, columns = grid_shape
     neighbors = []
     
     for dx, dy in directions:
@@ -28,7 +27,7 @@ def reconstruct_path(node):
     path.reverse()
     return path
 
-def ucs_graph_pathfind(start_node, goal_node, grid):
+def ucs_graph_pathfind(start_node, goal_node, grid, grid_shape):
     start_time = time.time()
     nodes_expanded = 0
     
@@ -50,7 +49,7 @@ def ucs_graph_pathfind(start_node, goal_node, grid):
         
         closed_set[parent_node.state] = parent_node
         
-        for neighbor in get_neighbors(grid, parent_node):
+        for neighbor in get_neighbors(grid, parent_node, grid_shape):
             new_cost = parent_node.cost + neighbor.cost
             if neighbor.state not in closed_set and (neighbor.state not in best_cost or new_cost < best_cost[neighbor.state]):
                 neighbor.cost = new_cost
@@ -60,7 +59,7 @@ def ucs_graph_pathfind(start_node, goal_node, grid):
     
     return [], nodes_expanded, time.time() - start_time
 
-def ucs_tree_pathfind(start_node, goal_node, grid):
+def ucs_tree_pathfind(start_node, goal_node, grid, grid_shape):
     start_time = time.time()
     nodes_expanded = 0
     
@@ -79,7 +78,7 @@ def ucs_tree_pathfind(start_node, goal_node, grid):
             execution_time = time.time() - start_time
             return reconstruct_path(parent_node), nodes_expanded, execution_time
         
-        for neighbor in get_neighbors(grid, parent_node):
+        for neighbor in get_neighbors(grid, parent_node, grid_shape):
             new_cost = parent_node.cost + neighbor.cost
             if neighbor.state not in best_cost or new_cost < best_cost[neighbor.state]:
                 neighbor.cost = new_cost
@@ -89,21 +88,18 @@ def ucs_tree_pathfind(start_node, goal_node, grid):
                 
     return [], nodes_expanded, time.time() - start_time
 
-def main():
-    grid = create_grid(10, 10)
-    generate_obstacles(grid, obstacle_count = 5)
-    
-    start_node = grid[0][0]
-    goal_node = grid[9][9]
+def main():    
+    #generate_obstacles(grid, obstacle_count = 5)
+    start_node, goal_node, grid, grid_shape = read_grid("common/maze_50x50_4directions.xlsx")
     
     # Ask the user which UCS version to run
     algorithm = input("Select UCS version (tree/graph): ").strip().lower()
 
     if algorithm == "tree":
-        path, nodes_expanded, execution_time = ucs_tree_pathfind(start_node, goal_node, grid)
+        path, nodes_expanded, execution_time = ucs_tree_pathfind(start_node, goal_node, grid, grid_shape)
         algorithm_name = "UCS Tree Search"
     elif algorithm == "graph":
-        path, nodes_expanded, execution_time = ucs_graph_pathfind(start_node, goal_node, grid)
+        path, nodes_expanded, execution_time = ucs_graph_pathfind(start_node, goal_node, grid, grid_shape)
         algorithm_name = "UCS Graph Search"
     else:
         print("Invalid choice! Exiting.")

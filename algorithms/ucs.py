@@ -28,7 +28,7 @@ def reconstruct_path(node):
     path.reverse()
     return path
 
-def ucs_pathfind(start_node, goal_node, grid):
+def ucs_graph_pathfind(start_node, goal_node, grid):
     start_time = time.time()
     nodes_expanded = 0
     
@@ -60,21 +60,60 @@ def ucs_pathfind(start_node, goal_node, grid):
     
     return [], nodes_expanded, time.time() - start_time
 
+def ucs_tree_pathfind(start_node, goal_node, grid):
+    start_time = time.time()
+    nodes_expanded = 0
+    
+    open_set = []
+    best_cost = {}
+    
+    start_node.cost = 0
+    heapq.heappush(open_set, (0, start_node))
+    best_cost[start_node.state] = 0
+    
+    while open_set:
+        nodes_expanded += 1
+        current_cost, parent_node = heapq.heappop(open_set)
+        
+        if parent_node.state == goal_node.state:
+            execution_time = time.time() - start_time
+            return reconstruct_path(parent_node), nodes_expanded, execution_time
+        
+        for neighbor in get_neighbors(grid, parent_node):
+            new_cost = parent_node.cost + neighbor.cost
+            if neighbor.state not in best_cost or new_cost < best_cost[neighbor.state]:
+                neighbor.cost = new_cost
+                neighbor.parent = parent_node
+                best_cost[neighbor.state] = new_cost
+                heapq.heappush(open_set, (neighbor.cost, neighbor))
+                
+    return [], nodes_expanded, time.time() - start_time
+
 def main():
-    grid = create_grid(100, 100)
-    generate_obstacles(grid, obstacle_count = 1000)
-    # generate_fixed_obstacles(grid, [(0, 7), (1, 7), (3, 2), (2, 2), (4, 3), (6, 6), (6, 5)])
+    grid = create_grid(10, 10)
+    generate_obstacles(grid, obstacle_count = 5)
     
     start_node = grid[0][0]
-    #goal_node = grid[5][5]
-    goal_node = grid[99][99]
-    path, nodes_expanded, execution_time = ucs_pathfind(start_node, goal_node, grid)
+    goal_node = grid[9][9]
+    
+    # Ask the user which UCS version to run
+    algorithm = input("Select UCS version (tree/graph): ").strip().lower()
+
+    if algorithm == "tree":
+        path, nodes_expanded, execution_time = ucs_tree_pathfind(start_node, goal_node, grid)
+        algorithm_name = "UCS Tree Search"
+    elif algorithm == "graph":
+        path, nodes_expanded, execution_time = ucs_graph_pathfind(start_node, goal_node, grid)
+        algorithm_name = "UCS Graph Search"
+    else:
+        print("Invalid choice! Exiting.")
+        return
     
     print(f"UCS Path Length: {len(path)}")
     print(f"Nodes Expanded: {nodes_expanded}")
-    print(f"Execution Time: {execution_time:.6f} seconds")
+    print(f"Execution Time: {execution_time:.11f} seconds")
     
-    visualize_grid(start_node, goal_node, grid, path, algorithm="UCS")
+    visualize_grid(start_node, goal_node, grid, path, algorithm = algorithm_name)
 
 if __name__ == "__main__":
     main()

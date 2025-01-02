@@ -1,14 +1,14 @@
 from queue import Queue
 import time
-from common.grid import create_grid, generate_obstacles
+from common.grid import read_grid
 from common.visualization import visualize_grid
 
 
 def bfs_graph(start, goal, grid):
     """
-    Breadth-First Search implementation with Graph Search (with duplicate checking).
+    Breadth-First Search implementation with Graph Search.
     """
-    # Initialize performance metrics
+
     start_time = time.time()
     nodes_expanded = 0
 
@@ -20,9 +20,8 @@ def bfs_graph(start, goal, grid):
 
     while not queue.empty():
         current_node = queue.get()
-        nodes_expanded += 1  # Increment nodes expanded
+        nodes_expanded += 1
 
-        # Check if goal is reached
         if current_node.state == goal.state:
             execution_time = time.time() - start_time
             path = reconstruct_path(current_node)
@@ -43,43 +42,41 @@ def bfs_graph(start, goal, grid):
 
 def bfs_tree(start, goal, grid):
     """
-    Breadth-First Search implementation using Tree Search (no duplicate checking).
+        Breadth-First Search implementation with Tree Search.
     """
-    # Initialize performance metrics
+
     start_time = time.time()
     nodes_expanded = 0
 
-    # BFS initialization
+    for row in grid:
+        for node in row:
+            node.parent = None
+
     queue = Queue()
+    start.parent = None
     queue.put(start)
 
     while not queue.empty():
         current_node = queue.get()
-        nodes_expanded += 1  # Increment nodes expanded
+        nodes_expanded += 1
 
-        # Check if goal is reached
         if current_node.state == goal.state:
             execution_time = time.time() - start_time
             path = reconstruct_path(current_node)
             return path, nodes_expanded, execution_time
 
-        # Explore neighbors
-        neighbors = get_neighbors(current_node, grid)
-        for neighbor in neighbors:
-            if neighbor.is_walkable and neighbor.parent is None:  # Check if the node is unvisited
+        for neighbor in get_neighbors(current_node, grid):
+            if neighbor.is_walkable and neighbor.parent is None:
+                if current_node.parent is not None and neighbor == current_node.parent:
+                    continue
                 neighbor.parent = current_node
                 queue.put(neighbor)
 
-    # If no path is found
     execution_time = time.time() - start_time
-    print(nodes_expanded, execution_time)
     return [], nodes_expanded, execution_time
 
 
 def reconstruct_path(goal_node):
-    """
-    Reconstructs the path from the goal node back to the start node.
-    """
     path = []
     current = goal_node
     while current:
@@ -89,9 +86,6 @@ def reconstruct_path(goal_node):
 
 
 def get_neighbors(node, grid):
-    """
-    Retrieves valid neighboring nodes.
-    """
     rows, cols = len(grid), len(grid[0])
     directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
     neighbors = []
@@ -103,12 +97,7 @@ def get_neighbors(node, grid):
 
 
 def main():
-    rows, columns = 10, 10
-    grid = create_grid(rows, columns)
-    generate_obstacles(grid, obstacle_count=20)
-
-    start_node = grid[0][0]
-    goal_node = grid[rows - 1][columns - 1]
+    start_node, goal_node, grid, grid_shape = read_grid("common/maze_50x50_4directions.xlsx")
 
     # Ask the user which BFS version to run
     algorithm = input("Select BFS version (tree/graph): ").strip().lower()
@@ -124,6 +113,7 @@ def main():
         return
 
     # Display performance metrics
+    print(f"Path: {path}")
     print(f"Path Length: {len(path)}")
     print(f"Nodes Expanded: {nodes_expanded}")
     print(f"Execution Time: {execution_time:.4f} seconds")

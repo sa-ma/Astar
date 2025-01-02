@@ -1,5 +1,5 @@
 import heapq
-from common.grid import create_grid, generate_obstacles, read_grid
+from common.grid import read_grid
 from common.visualization import visualize_grid
 from common.node import Node
 import time

@@ -90,18 +90,19 @@ def ucs_tree_pathfind(start_node, goal_node, grid, grid_shape):
 
 def main():    
     #generate_obstacles(grid, obstacle_count = 5)
-    maze_file_path = "common/maze_50x50_4directions.xlsx"
+    maze_file_path = "common/online_maze.xlsx"
     cost_file_path = "common/node_costs_50x50.xlsx"
     start_node, goal_node, grid, grid_shape = read_grid(maze_file_path, cost_file_path)
     
     # Ask the user which UCS version to run
     algorithm = input("Select UCS version (tree/graph): ").strip().lower()
-
+    
     if algorithm == "tree":
         path, nodes_expanded, execution_time = ucs_tree_pathfind(start_node, goal_node, grid, grid_shape)
         algorithm_name = "UCS Tree Search"
     elif algorithm == "graph":
         path, nodes_expanded, execution_time = ucs_graph_pathfind(start_node, goal_node, grid, grid_shape)
+        # path, nodes_expanded, execution_time = dfs_graph(start_node, goal_node, grid)
         algorithm_name = "UCS Graph Search"
     else:
         print("Invalid choice! Exiting.")

@@ -1,14 +1,15 @@
+import os
 import time
+import tracemalloc
 from common.grid import read_grid
 from common.visualization import visualize_grid
+
 
 def dfs_graph(start, goal, grid):
     """
     Depth-First (Graph) Search implementation.
     """
-    start_time = time.perf_counter()
     nodes_expanded = 0
-
     # Initialize stack and visited set
     stack = [start] 
     visited = {start.state}
@@ -19,9 +20,8 @@ def dfs_graph(start, goal, grid):
 
         # Check if goal is found
         if current_node.state == goal.state:
-            execution_time = time.perf_counter() - start_time
             path = reconstruct_path(current_node)
-            return path, nodes_expanded, execution_time
+            return path, nodes_expanded
 
         # Explore neighbors
         for neighbor in get_neighbors(current_node, grid):
@@ -31,18 +31,15 @@ def dfs_graph(start, goal, grid):
                 stack.append(neighbor)
 
     # If no path is found
-    execution_time = time.perf_counter() - start_time
-    return [], nodes_expanded, execution_time
+    return [], nodes_expanded
 
 
 def dfs_tree(start, goal, grid):
     """
     Depth-First (Tree) Search implementation.
     """
-    start_time = time.perf_counter()
     nodes_expanded = 0
-
-    # Reset parents (Tree Search assumption: no repeated states if you don't revisit the parent)
+    # Reset parents
     for row in grid:
         for node in row:
             node.parent = None
@@ -56,9 +53,8 @@ def dfs_tree(start, goal, grid):
 
         # Check if goal is found
         if current_node.state == goal.state:
-            execution_time = time.perf_counter() - start_time
             path = reconstruct_path(current_node)
-            return path, nodes_expanded, execution_time
+            return path, nodes_expanded
 
         # Explore neighbors
         for neighbor in get_neighbors(current_node, grid):
@@ -71,8 +67,7 @@ def dfs_tree(start, goal, grid):
                 stack.append(neighbor)
 
     # If no path is found
-    execution_time = time.perf_counter() - start_time
-    return [], nodes_expanded, execution_time
+    return [], nodes_expanded
 
 
 def reconstruct_path(goal_node):
@@ -98,7 +93,31 @@ def get_neighbors(node, grid):
 
 
 def main():
-    start_node, goal_node, grid, grid_shape = read_grid("common/maze_50x50_4directions.xlsx")
+    # Grid selection
+    excel_files = [f for f in os.listdir("common") if f.endswith(".xlsx")]
+
+    if not excel_files:
+        print("No .xlsx files found in the 'common' folder.")
+    else:
+        # Print them with indexes
+        for i, f in enumerate(excel_files):
+            print(f"{i}: {f}")
+
+        # Ask user to pick grid
+        choice = input("Enter the number of the file you want to open: ")
+
+        # Convert to integer
+        try:
+            choice_index = int(choice)
+            chosen_file = excel_files[choice_index]
+            chosen_path = os.path.join("common", chosen_file)
+
+            print(f"You chose: {chosen_path}")
+        except (ValueError, IndexError):
+            print("Invalid choice!")
+
+    cost_file_path = "common/node_costs_50x50.xlsx"
+    start_node, goal_node, grid, grid_shape = read_grid(chosen_path, cost_file_path)
 
     # Ask the user which algorithm to run
     algorithm = input("Select DFS algorithm (tree/graph): ").strip().lower()
@@ -116,14 +135,22 @@ def main():
         dfs = dfs_graph
         search_type = "DFS Graph Search"
 
+    tracemalloc.start()
+    start_time = time.perf_counter()
+
     # Run DFS
-    path, nodes_expanded, execution_time = dfs(start_node, goal_node, grid)
+    path, nodes_expanded = dfs(start_node, goal_node, grid)
+
+    end_time = time.perf_counter()
+    current, peak = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
 
     # Display performance metrics
-    print(f"Path: {path}")
+    print(f"Execution Time: {end_time-start_time:.6f} seconds")
+    #print(f"Path: {path}")
     print(f"Path Length: {len(path)}")
-    print(f"Nodes Expanded: {nodes_expanded}")
-    print(f"Execution Time: {execution_time:.4f} seconds")
+    #print(f"Nodes Expanded: {nodes_expanded}")
+    print(f"Memory usage: {(peak-current) / 1024:.2f} KB")
 
     # Visualize the result
     visualize_grid(start_node, goal_node, grid, path, algorithm=search_type)

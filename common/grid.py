@@ -1,17 +1,58 @@
+import random
+import pandas as pd
 from common.node import Node
 
-# TODO:
-# Create a grid that is made for tree traversal check. (No infinite loops)
-
-def create_grid(rows, columns, default_cost=1):
+def read_grid(file_path, cost_file_path):
+    df = pd.read_excel(file_path, header = None)
+    df_cost = pd.read_excel(cost_file_path, header = None)
+    
     grid = []
+    rows, columns = df.shape
+    start_node = 0
+    goal_node = 0
+    
     for x in range(rows):
         row = []
         for y in range(columns):
-            row.append(Node(x, y, True, default_cost))
+            node_value = df.iloc[x, y]
+            node_cost = df_cost.iloc[x, y]
+            
+            # Node is walkable if excel node value is 0, 2, or 3.
+            is_walkable = node_value == 0 or node_value == 2 or node_value == 3
+            node = Node(x, y, is_walkable, cost = node_cost if is_walkable else float('inf'))
+            
+            # Start Node
+            if node_value == 2:
+                node.cost = 0
+                start_node = node
+            # Goal Node
+            elif node_value == 3:
+                node.cost = node_cost
+                goal_node = node
+                
+            row.append(node)
         grid.append(row)
-    return grid
+    
+    return start_node, goal_node, grid, df.shape
 
-def generate_obstacles(grid, obstacles):
-    for (x, y) in obstacles:
+def create_grid(rows, columns, default_cost=1):
+    """
+    Creates a grid of nodes with specified dimensions and default cost.
+    """
+    return [[Node(x, y, True, default_cost) for y in range(columns)] for x in range(rows)]
+
+def generate_obstacles(grid, obstacle_count):
+    """
+    Places obstacles randomly in the grid.
+    """
+    rows = len(grid)
+    cols = len(grid[0])
+    all_positions = [(x, y) for x in range(rows) for y in range(cols)]
+    obstacles = random.sample(all_positions, obstacle_count)
+
+    for x, y in obstacles:
+        grid[x][y].is_walkable = False
+    
+def generate_fixed_obstacles(grid, obstacles):
+    for x, y in obstacles:
         grid[x][y].is_walkable = False

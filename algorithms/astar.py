@@ -7,25 +7,18 @@ from common.grid import read_grid
 def heuristic(node, goal):
     return abs(node.x - goal.x) + abs(node.y - goal.y) # Manhattan distance
 
+
 def get_neighbors(grid, node, grid_shape):
+    directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+    rows, columns = grid_shape
     neighbors = []
-    for i in range(-1, 2):
-        for j in range(-1, 2):
-            if i == 0 and j == 0:
-                continue
-            
-            new_position = (node.x + i, node.y + j)
-            if (new_position[0] < 0 
-                or new_position[0] >= grid_shape[0]
-                or new_position[1] < 0
-                or new_position[1] >= grid_shape[1]):
-                continue
-            
-            new_node = grid[new_position[0]][new_position[1]]
-            if new_node.is_walkable:
-                new_node.cost = 1
-                neighbors.append(new_node)
-                
+    
+    for dx, dy in directions:
+        nx, ny = node.x + dx, node.y + dy
+        if 0 <= nx < rows and 0 <= ny < columns:
+            neighbor_node = grid[nx][ny]
+            if neighbor_node.is_walkable:
+                neighbors.append(neighbor_node)
     return neighbors
 
 def reconstruct_path(node):
@@ -100,7 +93,9 @@ def astar_graph_pathfind(start_node, goal_node, grid, grid_shape):
 
 def main():    
     #generate_obstacles(grid, obstacle_count = 5)
-    start_node, goal_node, grid, grid_shape = read_grid("common/maze_4x4_4directions.xlsx")
+    maze_file_path = "common/online_maze.xlsx"
+    cost_file_path = "common/node_costs_50x50.xlsx"
+    start_node, goal_node, grid, grid_shape = read_grid(maze_file_path, cost_file_path)
     
     # Ask the user which UCS version to run
     algorithm = input("Select A* version (tree/graph): ").strip().lower()

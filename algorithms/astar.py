@@ -34,26 +34,43 @@ def reconstruct_path(node):
 def astar_tree_pathfind(start_node, goal_node, grid, grid_shape):
     start_time = time.time()
     nodes_expanded = 0
-    
+
+    # Priority queue for open set
     open_set = []
+    # Set to track expanded nodes
+    closed_set = set()
+
+    # Initialize starting node
     start_node.cost = 0
     heapq.heappush(open_set, (0, start_node))
-    
+
     while open_set:
         nodes_expanded += 1
         _, parent_node = heapq.heappop(open_set)
-        
+
+        # Skip if already expanded
+        if parent_node.state in closed_set:
+            continue
+
+        # Mark the node as expanded
+        closed_set.add(parent_node.state)
+
+        # Check if the goal is reached
         if parent_node.state == goal_node.state:
             execution_time = time.time() - start_time
             return reconstruct_path(parent_node), nodes_expanded, execution_time
-        
+
+        # Explore neighbors
         for neighbor in get_neighbors(grid, parent_node, grid_shape):
             new_cost = parent_node.cost + neighbor.cost + heuristic(neighbor, goal_node)
-            if neighbor.parent is None or new_cost < neighbor.cost:
+
+            # Update neighbor only if it is not yet expanded
+            if neighbor.state not in closed_set:
                 neighbor.cost = new_cost
                 neighbor.parent = parent_node
                 heapq.heappush(open_set, (new_cost, neighbor))
-                
+
+    # If no path found
     return [], nodes_expanded, time.time() - start_time
 
 

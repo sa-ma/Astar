@@ -5,7 +5,7 @@ from common.grid import read_grid
 
 
 def heuristic(node, goal):
-    return abs(node.x - goal.x) + abs(node.y - goal.y)
+    return abs(node.x - goal.x) + abs(node.y - goal.y) # Manhattan distance
 
 def get_neighbors(grid, node, grid_shape):
     neighbors = []
@@ -48,7 +48,7 @@ def astar_tree_pathfind(start_node, goal_node, grid, grid_shape):
     
     while open_set:
         nodes_expanded += 1
-        current_cost, parent_node = heapq.heappop(open_set)
+        _, parent_node = heapq.heappop(open_set)
         
         if parent_node.state == goal_node.state:
             execution_time = time.time() - start_time
@@ -56,7 +56,7 @@ def astar_tree_pathfind(start_node, goal_node, grid, grid_shape):
         
         for neighbor in get_neighbors(grid, parent_node, grid_shape):
             new_cost = parent_node.cost + neighbor.cost + heuristic(neighbor, goal_node)
-            if neighbor.cost == 1 or new_cost < neighbor.cost:
+            if neighbor.parent is None or new_cost < neighbor.cost:
                 neighbor.cost = new_cost
                 neighbor.parent = parent_node
                 heapq.heappush(open_set, (new_cost, neighbor))
@@ -100,17 +100,17 @@ def astar_graph_pathfind(start_node, goal_node, grid, grid_shape):
 
 def main():    
     #generate_obstacles(grid, obstacle_count = 5)
-    start_node, goal_node, grid, grid_shape = read_grid("common/maze_50x50_4directions.xlsx")
+    start_node, goal_node, grid, grid_shape = read_grid("common/maze_4x4_4directions.xlsx")
     
     # Ask the user which UCS version to run
-    algorithm = input("Select UCS version (tree/graph): ").strip().lower()
+    algorithm = input("Select A* version (tree/graph): ").strip().lower()
 
     if algorithm == "tree":
         path, nodes_expanded, execution_time = astar_tree_pathfind(start_node, goal_node, grid, grid_shape)
-        algorithm_name = "UCS Tree Search"
+        algorithm_name = "A* Tree Search"
     elif algorithm == "graph":
         path, nodes_expanded, execution_time = astar_graph_pathfind(start_node, goal_node, grid, grid_shape)
-        algorithm_name = "UCS Graph Search"
+        algorithm_name = "A* Graph Search"
     else:
         print("Invalid choice! Exiting.")
         return

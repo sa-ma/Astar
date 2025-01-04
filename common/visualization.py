@@ -1,14 +1,17 @@
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
+import numpy as np
 
-def visualize_grid(start_node, goal_node, grid, path, algorithm="BFS"):
+def visualize_grid(start_node, goal_node, grid, path, algorithm):
     """
     Visualizes the grid with obstacles, path, and start/goal nodes.
     Dynamically adjusts the legend based on the algorithm name.
     """
     rows = len(grid)
     columns = len(grid[0])
-    cmap = ListedColormap(["black", "white", "green", "blue", "red"])  # Colors: obstacles, free, path, start, goal
+
+    # Colors:              obstacles, free,    path,   start, goal
+    cmap = ListedColormap(["black", "white", "green", "blue", "red"])  
     visual_grid = [[0 for _ in range(columns)] for _ in range(rows)]
 
     # Fill the visual grid
@@ -29,14 +32,20 @@ def visualize_grid(start_node, goal_node, grid, path, algorithm="BFS"):
     plt.figure(figsize=(10, 10))
     plt.imshow(visual_grid, cmap=cmap, origin='lower')
 
-    # Add gridlines
-    plt.xticks(range(columns))
-    plt.yticks(range(rows))
-    plt.grid(which="both", color="black", linestyle="-", linewidth=0.5)
+    # Move the grid lines by 0.5 to align exactly with pathing
     plt.xlim(-0.5, columns - 0.5)
     plt.ylim(-0.5, rows - 0.5)
+    
+    # Set up grid lines at each integer boundary
+    plt.gca().set_xticks(np.arange(-0.5, columns, 1))
+    plt.gca().set_yticks(np.arange(-0.5, rows, 1))
+    
+    # Turn on the grid, and remove axis labels
+    plt.gca().set_xticklabels([])
+    plt.gca().set_yticklabels([])
+    plt.grid(which="both", color="black", linestyle="-", linewidth=0.5)
 
-    # Add a dynamic legend
+    # Add legend
     colors = ['black', 'white', 'blue', 'green', 'red']
     labels = [
         'Obstacle',

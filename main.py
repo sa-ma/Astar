@@ -1,8 +1,12 @@
-from algorithms import bfs, dfs, ucs
+from algorithms import bfs, dfs, ucs, astar
 
 def main():
     # for quick testing only: (uncomment rest of the code to choose)
-    ucs.main()
+    #bfs.main()
+    #dfs.main()
+    #ucs.main()
+    astar.main()
+    
     # choice = input("Choose algorithm (bfs/dfs/ucs): ").strip().lower()
     # if choice == "bfs":
     #     bfs.main()

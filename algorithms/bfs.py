@@ -97,7 +97,9 @@ def get_neighbors(node, grid):
 
 
 def main():
-    start_node, goal_node, grid, grid_shape = read_grid("common/maze_50x50_4directions.xlsx")
+    cost_file_path = "common/node_costs_50x50.xlsx"
+    maze_file_path = "common/online_maze.xlsx"
+    start_node, goal_node, grid, grid_shape = read_grid(maze_file_path, cost_file_path)
 
     # Ask the user which BFS version to run
     algorithm = input("Select BFS version (tree/graph): ").strip().lower()
@@ -113,7 +115,6 @@ def main():
         return
 
     # Display performance metrics
-    print(f"Path: {path}")
     print(f"Path Length: {len(path)}")
     print(f"Nodes Expanded: {nodes_expanded}")
     print(f"Execution Time: {execution_time:.4f} seconds")

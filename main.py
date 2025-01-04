@@ -6,6 +6,7 @@ def main():
     #dfs.main()
     #ucs.main()
     astar.main()
+    
     # choice = input("Choose algorithm (bfs/dfs/ucs): ").strip().lower()
     # if choice == "bfs":
     #     bfs.main()

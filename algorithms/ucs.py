@@ -28,7 +28,7 @@ def reconstruct_path(node):
     return path
 
 def ucs_graph_pathfind(start_node, goal_node, grid, grid_shape):
-    start_time = time.time()
+    start_time = time.perf_counter()
     nodes_expanded = 0
     
     open_set = []
@@ -44,7 +44,7 @@ def ucs_graph_pathfind(start_node, goal_node, grid, grid_shape):
         current_cost, parent_node = heapq.heappop(open_set)
         
         if parent_node.state == goal_node.state:
-            execution_time = time.time() - start_time
+            execution_time = time.perf_counter() - start_time
             return reconstruct_path(parent_node), nodes_expanded, execution_time
         
         closed_set[parent_node.state] = parent_node
@@ -57,10 +57,10 @@ def ucs_graph_pathfind(start_node, goal_node, grid, grid_shape):
                 best_cost[neighbor.state] = new_cost
                 heapq.heappush(open_set, (neighbor.cost, neighbor))
     
-    return [], nodes_expanded, time.time() - start_time
+    return [], nodes_expanded, time.perf_counter() - start_time
 
 def ucs_tree_pathfind(start_node, goal_node, grid, grid_shape):
-    start_time = time.time()
+    start_time = time.perf_counter()
     nodes_expanded = 0
     
     open_set = []
@@ -75,7 +75,7 @@ def ucs_tree_pathfind(start_node, goal_node, grid, grid_shape):
         current_cost, parent_node = heapq.heappop(open_set)
         
         if parent_node.state == goal_node.state:
-            execution_time = time.time() - start_time
+            execution_time = time.perf_counter() - start_time
             return reconstruct_path(parent_node), nodes_expanded, execution_time
         
         for neighbor in get_neighbors(grid, parent_node, grid_shape):
@@ -86,20 +86,23 @@ def ucs_tree_pathfind(start_node, goal_node, grid, grid_shape):
                 best_cost[neighbor.state] = new_cost
                 heapq.heappush(open_set, (neighbor.cost, neighbor))
                 
-    return [], nodes_expanded, time.time() - start_time
+    return [], nodes_expanded, time.perf_counter() - start_time
 
 def main():    
     #generate_obstacles(grid, obstacle_count = 5)
-    start_node, goal_node, grid, grid_shape = read_grid("common/maze_50x50_4directions.xlsx")
+    maze_file_path = "common/online_maze.xlsx"
+    cost_file_path = "common/node_costs_50x50.xlsx"
+    start_node, goal_node, grid, grid_shape = read_grid(maze_file_path, cost_file_path)
     
     # Ask the user which UCS version to run
     algorithm = input("Select UCS version (tree/graph): ").strip().lower()
-
+    
     if algorithm == "tree":
         path, nodes_expanded, execution_time = ucs_tree_pathfind(start_node, goal_node, grid, grid_shape)
         algorithm_name = "UCS Tree Search"
     elif algorithm == "graph":
         path, nodes_expanded, execution_time = ucs_graph_pathfind(start_node, goal_node, grid, grid_shape)
+        # path, nodes_expanded, execution_time = dfs_graph(start_node, goal_node, grid)
         algorithm_name = "UCS Graph Search"
     else:
         print("Invalid choice! Exiting.")
@@ -107,6 +110,7 @@ def main():
     
     print(f"UCS Path Length: {len(path)}")
     print(f"Nodes Expanded: {nodes_expanded}")
+    print(f"Total Path Cost: {path[-1].cost if path else None}")
     print(f"Execution Time: {execution_time:.11f} seconds")
     
     visualize_grid(start_node, goal_node, grid, path, algorithm = algorithm_name)

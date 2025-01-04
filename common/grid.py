@@ -2,8 +2,9 @@ import random
 import pandas as pd
 from common.node import Node
 
-def read_grid(file_path):
+def read_grid(file_path, cost_file_path):
     df = pd.read_excel(file_path, header = None)
+    df_cost = pd.read_excel(cost_file_path, header = None)
     
     grid = []
     rows, columns = df.shape
@@ -14,10 +15,11 @@ def read_grid(file_path):
         row = []
         for y in range(columns):
             node_value = df.iloc[x, y]
+            node_cost = df_cost.iloc[x, y]
             
             # Node is walkable if excel node value is 0, 2, or 3.
             is_walkable = node_value == 0 or node_value == 2 or node_value == 3
-            node = Node(x, y, is_walkable, cost = 1)
+            node = Node(x, y, is_walkable, cost = node_cost if is_walkable else float('inf'))
             
             # Start Node
             if node_value == 2:
@@ -25,11 +27,9 @@ def read_grid(file_path):
                 start_node = node
             # Goal Node
             elif node_value == 3:
-                node.cost = 1
+                node.cost = node_cost
                 goal_node = node
-            # Obstacle Node
-            elif node_value == 1:
-                node.cost = float('inf')
+                
             row.append(node)
         grid.append(row)
     

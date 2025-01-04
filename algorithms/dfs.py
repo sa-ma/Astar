@@ -1,95 +1,133 @@
-from queue import LifoQueue
 import time
-from common.grid import create_grid, generate_obstacles
+from common.grid import read_grid
 from common.visualization import visualize_grid
-from common.node import Node
 
-def dfs(start: Node, goal: Node, grid: list[list[Node]]) -> tuple[list[Node], int, float]:
+def dfs_graph(start, goal, grid):
     """
-    Depth-First Search implementation with performance metrics.
+    Depth-First (Graph) Search implementation.
     """
-    # Initialize performance metrics
-    start_time = time.time()
+    start_time = time.perf_counter()
     nodes_expanded = 0
 
-    # DFS initialization
-    stack = LifoQueue()
-    stack.put(start)
-    visited: set[tuple[int, int]] = set()
-    visited.add(start.state)
+    # Initialize stack and visited set
+    stack = [start] 
+    visited = {start.state}
 
-    while not stack.empty():
-        current_node = stack.get()
-        nodes_expanded += 1  # Increment nodes expanded
+    while stack:
+        current_node = stack.pop()
+        nodes_expanded += 1
 
-        # Goal check
+        # Check if goal is found
         if current_node.state == goal.state:
-            execution_time = time.time() - start_time
+            execution_time = time.perf_counter() - start_time
             path = reconstruct_path(current_node)
             return path, nodes_expanded, execution_time
 
         # Explore neighbors
         for neighbor in get_neighbors(current_node, grid):
-            if neighbor.state not in visited:
-                visited.add(neighbor.state)
+            if neighbor.state not in visited and neighbor.is_walkable:
                 neighbor.parent = current_node
-                stack.put(neighbor)
+                visited.add(neighbor.state)
+                stack.append(neighbor)
 
-    # No path found
-    execution_time = time.time() - start_time
+    # If no path is found
+    execution_time = time.perf_counter() - start_time
     return [], nodes_expanded, execution_time
 
+
+def dfs_tree(start, goal, grid):
+    """
+    Depth-First (Tree) Search implementation.
+    """
+    start_time = time.perf_counter()
+    nodes_expanded = 0
+
+    # Reset parents (Tree Search assumption: no repeated states if you don't revisit the parent)
+    for row in grid:
+        for node in row:
+            node.parent = None
+
+    # Initialize stack
+    stack = [start]
+
+    while stack:
+        current_node = stack.pop()
+        nodes_expanded += 1
+
+        # Check if goal is found
+        if current_node.state == goal.state:
+            execution_time = time.perf_counter() - start_time
+            path = reconstruct_path(current_node)
+            return path, nodes_expanded, execution_time
+
+        # Explore neighbors
+        for neighbor in get_neighbors(current_node, grid):
+            # If neighbor has no parent, it hasn't been visited yet in Tree Search
+            if neighbor.is_walkable and neighbor.parent is None:
+                # Optionally skip going directly back to the parent
+                if current_node.parent is not None and neighbor == current_node.parent:
+                    continue
+                neighbor.parent = current_node
+                stack.append(neighbor)
+
+    # If no path is found
+    execution_time = time.perf_counter() - start_time
+    return [], nodes_expanded, execution_time
+
+
 def reconstruct_path(goal_node):
-    """
-    Reconstructs the path from the goal node back to the start node.
-    """
     path = []
     current = goal_node
     while current:
         path.append(current)
         current = current.parent
-    path.reverse()
-    return path
+    return path[::-1]
 
-def get_neighbors(node: Node, grid: list[list[Node]]) -> list[Node]:
-    """
-    Retrieves valid neighboring nodes.
-    """
+
+def get_neighbors(node, grid):
     rows, cols = len(grid), len(grid[0])
     directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
     neighbors = []
 
     for dx, dy in directions:
         new_x, new_y = node.x + dx, node.y + dy
-        if 0 <= new_x < rows and 0 <= new_y < cols:  # Boundary check
-            neighbor = grid[new_x][new_y]
-            if neighbor.is_walkable:
-                neighbors.append(neighbor)
+        if 0 <= new_x < rows and 0 <= new_y < cols:
+            neighbors.append(grid[new_x][new_y])
 
     return neighbors
 
+
 def main():
-    rows, columns = 100, 100
-    grid = create_grid(rows, columns)
-    generate_obstacles(grid, obstacle_count=20)
+    start_node, goal_node, grid, grid_shape = read_grid("common/maze_50x50_4directions.xlsx")
 
-    start_node = grid[0][0]
-    goal_node = grid[rows - 1][columns - 1]
+    # Ask the user which algorithm to run
+    algorithm = input("Select DFS algorithm (tree/graph): ").strip().lower()
 
-    # Ensure start and goal are walkable
-    start_node.is_walkable = True
-    goal_node.is_walkable = True    
+    if algorithm == "tree":
+        print("Running tree search.")
+        dfs = dfs_tree
+        search_type = "DFS Tree Search"
+    elif algorithm == "graph":
+        print("Running graph search.")
+        dfs = dfs_graph
+        search_type = "DFS Graph Search"
+    else:
+        print("Running graph search as default.")
+        dfs = dfs_graph
+        search_type = "DFS Graph Search"
 
     # Run DFS
     path, nodes_expanded, execution_time = dfs(start_node, goal_node, grid)
 
     # Display performance metrics
-    print(f"DFS Path Length: {len(path)}")
+    print(f"Path: {path}")
+    print(f"Path Length: {len(path)}")
     print(f"Nodes Expanded: {nodes_expanded}")
     print(f"Execution Time: {execution_time:.4f} seconds")
 
     # Visualize the result
-    visualize_grid(start_node, goal_node, grid, path, algorithm="DFS")
+    visualize_grid(start_node, goal_node, grid, path, algorithm=search_type)
+
 
 if __name__ == "__main__":
     main()

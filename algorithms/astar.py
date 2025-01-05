@@ -2,7 +2,7 @@ import heapq
 import time
 from common.visualization import visualize_grid
 from common.grid import read_grid
-
+from common.performance import track_performance
 
 def heuristic(node, goal):
     return abs(node.x - goal.x) + abs(node.y - goal.y) # Manhattan distance
@@ -30,9 +30,8 @@ def reconstruct_path(node):
     path.reverse()
     return path
 
-
+@track_performance
 def astar_tree_pathfind(start_node, goal_node, grid, grid_shape):
-    start_time = time.time()
     nodes_expanded = 0
 
     # Priority queue for open set
@@ -57,8 +56,7 @@ def astar_tree_pathfind(start_node, goal_node, grid, grid_shape):
 
         # Check if the goal is reached
         if parent_node.state == goal_node.state:
-            execution_time = time.time() - start_time
-            return reconstruct_path(parent_node), nodes_expanded, execution_time
+            return reconstruct_path(parent_node), nodes_expanded
 
         # Explore neighbors
         for neighbor in get_neighbors(grid, parent_node, grid_shape):
@@ -71,11 +69,10 @@ def astar_tree_pathfind(start_node, goal_node, grid, grid_shape):
                 heapq.heappush(open_set, (new_cost, neighbor))
 
     # If no path found
-    return [], nodes_expanded, time.time() - start_time
+    return [], nodes_expanded
 
-
+@track_performance
 def astar_graph_pathfind(start_node, goal_node, grid, grid_shape):
-    start_time = time.time()
     nodes_expanded = 0
     
     open_set = []
@@ -92,8 +89,7 @@ def astar_graph_pathfind(start_node, goal_node, grid, grid_shape):
         current_cost, parent_node = heapq.heappop(open_set)
         
         if parent_node.state == goal_node.state:
-            execution_time = time.time() - start_time
-            return reconstruct_path(parent_node), nodes_expanded, execution_time
+            return reconstruct_path(parent_node), nodes_expanded
         
         closed_set[parent_node.state] = parent_node
         
@@ -105,7 +101,7 @@ def astar_graph_pathfind(start_node, goal_node, grid, grid_shape):
                 best_cost[neighbor.state] = new_cost
                 heapq.heappush(open_set, (new_cost, neighbor))
                 
-    return [], nodes_expanded, time.time() - start_time
+    return [], nodes_expanded
 
 
 def main():    
@@ -118,18 +114,14 @@ def main():
     algorithm = input("Select A* version (tree/graph): ").strip().lower()
 
     if algorithm == "tree":
-        path, nodes_expanded, execution_time = astar_tree_pathfind(start_node, goal_node, grid, grid_shape)
+        path, nodes_expanded = astar_tree_pathfind(start_node, goal_node, grid, grid_shape)
         algorithm_name = "A* Tree Search"
     elif algorithm == "graph":
-        path, nodes_expanded, execution_time = astar_graph_pathfind(start_node, goal_node, grid, grid_shape)
+        path, nodes_expanded = astar_graph_pathfind(start_node, goal_node, grid, grid_shape)
         algorithm_name = "A* Graph Search"
     else:
         print("Invalid choice! Exiting.")
         return
-    
-    print(f"UCS Path Length: {len(path)}")
-    print(f"Nodes Expanded: {nodes_expanded}")
-    print(f"Execution Time: {execution_time:.11f} seconds")
     
     visualize_grid(start_node, goal_node, grid, path, algorithm = algorithm_name)
 

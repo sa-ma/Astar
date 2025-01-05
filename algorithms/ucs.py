@@ -1,22 +1,24 @@
 import heapq
-from common.grid import read_grid
+from common.grid import read_grid, get_neighbors
 from common.visualization import visualize_grid
 from common.node import Node
 import time
+import pandas as pd
+import random
 
-def get_neighbors(grid, node, grid_shape):
-    directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
-    rows, columns = grid_shape
-    neighbors = []
+# def get_neighbors(grid, node, grid_shape):
+#     directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+#     rows, columns = grid_shape
+#     neighbors = []
     
-    for dx, dy in directions:
-        nx, ny = node.x + dx, node.y + dy
-        if 0 <= nx < rows and 0 <= ny < columns:
-            neighbor_node = grid[nx][ny]
-            if neighbor_node.is_walkable:
-                neighbors.append(neighbor_node)
+#     for dx, dy in directions:
+#         nx, ny = node.x + dx, node.y + dy
+#         if 0 <= nx < rows and 0 <= ny < columns:
+#             neighbor_node = grid[nx][ny]
+#             if neighbor_node.is_walkable:
+#                 neighbors.append(neighbor_node)
                 
-    return neighbors
+#    return neighbors
 
 def reconstruct_path(node):
     path = []
@@ -27,7 +29,7 @@ def reconstruct_path(node):
     path.reverse()
     return path
 
-def ucs_graph_pathfind(start_node, goal_node, grid, grid_shape):
+def ucs_graph_pathfind(start_node, goal_node, grid):
     start_time = time.perf_counter()
     nodes_expanded = 0
     
@@ -49,8 +51,8 @@ def ucs_graph_pathfind(start_node, goal_node, grid, grid_shape):
         
         closed_set[parent_node.state] = parent_node
         
-        for neighbor in get_neighbors(grid, parent_node, grid_shape):
-            new_cost = parent_node.cost + neighbor.cost
+        for neighbor, move_cost in get_neighbors(parent_node, grid):
+            new_cost = parent_node.cost + neighbor.cost + move_cost
             if neighbor.state not in closed_set and (neighbor.state not in best_cost or new_cost < best_cost[neighbor.state]):
                 neighbor.cost = new_cost
                 neighbor.parent = parent_node
@@ -59,7 +61,7 @@ def ucs_graph_pathfind(start_node, goal_node, grid, grid_shape):
     
     return [], nodes_expanded, time.perf_counter() - start_time
 
-def ucs_tree_pathfind(start_node, goal_node, grid, grid_shape):
+def ucs_tree_pathfind(start_node, goal_node, grid):
     start_time = time.perf_counter()
     nodes_expanded = 0
     
@@ -78,8 +80,8 @@ def ucs_tree_pathfind(start_node, goal_node, grid, grid_shape):
             execution_time = time.perf_counter() - start_time
             return reconstruct_path(parent_node), nodes_expanded, execution_time
         
-        for neighbor in get_neighbors(grid, parent_node, grid_shape):
-            new_cost = parent_node.cost + neighbor.cost
+        for neighbor, move_cost in get_neighbors(parent_node, grid):
+            new_cost = parent_node.cost + neighbor.cost + move_cost
             if neighbor.state not in best_cost or new_cost < best_cost[neighbor.state]:
                 neighbor.cost = new_cost
                 neighbor.parent = parent_node
@@ -90,7 +92,7 @@ def ucs_tree_pathfind(start_node, goal_node, grid, grid_shape):
 
 def main():    
     #generate_obstacles(grid, obstacle_count = 5)
-    maze_file_path = "common/online_maze.xlsx"
+    maze_file_path = "common/mirror_maze_50x50.xlsx"
     cost_file_path = "common/node_costs_50x50.xlsx"
     start_node, goal_node, grid, grid_shape = read_grid(maze_file_path, cost_file_path)
     
@@ -98,10 +100,10 @@ def main():
     algorithm = input("Select UCS version (tree/graph): ").strip().lower()
     
     if algorithm == "tree":
-        path, nodes_expanded, execution_time = ucs_tree_pathfind(start_node, goal_node, grid, grid_shape)
+        path, nodes_expanded, execution_time = ucs_tree_pathfind(start_node, goal_node, grid)
         algorithm_name = "UCS Tree Search"
     elif algorithm == "graph":
-        path, nodes_expanded, execution_time = ucs_graph_pathfind(start_node, goal_node, grid, grid_shape)
+        path, nodes_expanded, execution_time = ucs_graph_pathfind(start_node, goal_node, grid)
         # path, nodes_expanded, execution_time = dfs_graph(start_node, goal_node, grid)
         algorithm_name = "UCS Graph Search"
     else:
@@ -114,6 +116,6 @@ def main():
     print(f"Execution Time: {execution_time:.11f} seconds")
     
     visualize_grid(start_node, goal_node, grid, path, algorithm = algorithm_name)
-
+    
 if __name__ == "__main__":
     main()

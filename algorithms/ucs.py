@@ -1,24 +1,7 @@
 import heapq
 from common.grid import read_grid, get_neighbors
 from common.visualization import visualize_grid
-from common.node import Node
 import time
-import pandas as pd
-import random
-
-# def get_neighbors(grid, node, grid_shape):
-#     directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
-#     rows, columns = grid_shape
-#     neighbors = []
-    
-#     for dx, dy in directions:
-#         nx, ny = node.x + dx, node.y + dy
-#         if 0 <= nx < rows and 0 <= ny < columns:
-#             neighbor_node = grid[nx][ny]
-#             if neighbor_node.is_walkable:
-#                 neighbors.append(neighbor_node)
-                
-#    return neighbors
 
 def reconstruct_path(node):
     path = []
@@ -91,20 +74,18 @@ def ucs_tree_pathfind(start_node, goal_node, grid):
     return [], nodes_expanded, time.perf_counter() - start_time
 
 def main():    
-    #generate_obstacles(grid, obstacle_count = 5)
-    maze_file_path = "common/mirror_maze_50x50.xlsx"
+    maze_file_path = "common/mirror_maze_50x50_2.xlsx"
     cost_file_path = "common/node_costs_50x50.xlsx"
     start_node, goal_node, grid, grid_shape = read_grid(maze_file_path, cost_file_path)
     
     # Ask the user which UCS version to run
-    algorithm = input("Select UCS version (tree/graph): ").strip().lower()
+    algorithm = input("Select UCS version (tree/graph/both): ").strip().lower()
     
     if algorithm == "tree":
         path, nodes_expanded, execution_time = ucs_tree_pathfind(start_node, goal_node, grid)
         algorithm_name = "UCS Tree Search"
     elif algorithm == "graph":
         path, nodes_expanded, execution_time = ucs_graph_pathfind(start_node, goal_node, grid)
-        # path, nodes_expanded, execution_time = dfs_graph(start_node, goal_node, grid)
         algorithm_name = "UCS Graph Search"
     else:
         print("Invalid choice! Exiting.")
@@ -113,9 +94,10 @@ def main():
     print(f"UCS Path Length: {len(path)}")
     print(f"Nodes Expanded: {nodes_expanded}")
     print(f"Total Path Cost: {path[-1].cost if path else None}")
-    print(f"Execution Time: {execution_time:.11f} seconds")
+    ms_execution_time = execution_time * 1000
+    print(f"Execution Time: {ms_execution_time:.3f} ms")
     
     visualize_grid(start_node, goal_node, grid, path, algorithm = algorithm_name)
-    
+
 if __name__ == "__main__":
     main()

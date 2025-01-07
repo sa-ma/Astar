@@ -25,10 +25,12 @@ def read_grid(file_path, cost_file_path):
             if node_value == 2:
                 node.cost = 0
                 start_node = node
+                print(f"Start Node is at: ({x}, {y})")
             # Goal Node
             elif node_value == 3:
                 node.cost = node_cost
                 goal_node = node
+                print(f"Goal Node is at: ({x}, {y})")
                 
             row.append(node)
         grid.append(row)
@@ -73,5 +75,4 @@ def get_neighbors(node, grid):
         if 0 <= new_x < rows and 0 <= new_y < cols:
             move_cost = movement_costs[(dx, dy)]
             neighbors.append((grid[new_x][new_y], move_cost))
-
     return neighbors

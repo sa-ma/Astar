@@ -12,7 +12,7 @@ def dfs_graph(start, goal, grid):
     """
     nodes_expanded = 0
     # Initialize stack and visited set
-    stack = [start] 
+    stack = [start]
     visited = {start.state}
 
     while stack:
@@ -58,7 +58,7 @@ def dfs_tree(start, goal, grid):
             return path, nodes_expanded
 
         # Explore neighbors
-        for neighbor, _ in get_neighbors(grid, current_node):
+        for neighbor, _ in get_neighbors(grid, current_node):  # Unpack neighbor and move_cost
             # If neighbor has no parent, it hasn't been visited yet in Tree Search
             if neighbor.is_walkable and neighbor.parent is None:
                 # Optionally skip going directly back to the parent

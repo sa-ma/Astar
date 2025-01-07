@@ -1,9 +1,9 @@
 import heapq
-import time
 from common.visualization import visualize_grid
 from common.grid import read_grid
 from common.performance import track_performance
 from common.get_neighbors import get_neighbors
+import statistics
 
 def heuristic(node, goal):
     return abs(node.x - goal.x) + abs(node.y - goal.y) # Manhattan distance
@@ -90,26 +90,77 @@ def astar_graph_pathfind(start_node, goal_node, grid):
                 
     return [], nodes_expanded
 
-def main():    
+
+
+def simulate_astar(name, astar_func, start_node, goal_node, grid, n_sim_iterations=100):
+    results = []
+
+    for _ in range(n_sim_iterations):
+        # Call the A* function and collect performance metrics
+        _, metrics = astar_func(start_node, goal_node, grid)
+        results.append(metrics)
+
+    # Compute averages
+    averages = {
+        "execution_time": statistics.mean(r["execution_time"] for r in results),
+        "peak_memory": statistics.mean(r["peak_memory"] for r in results),
+        "current_memory": statistics.mean(r["current_memory"] for r in results),
+        "temporary_memory": statistics.mean(r["temporary_memory"] for r in results),
+    }
+
+    # Print results
+    print(f"######### {name.upper()} AVERAGES AFTER {n_sim_iterations} ITERATIONS #########")
+    print(f"Average Execution Time: {averages['execution_time']:.4f} seconds")
+    print(f"Average Peak Memory: {averages['peak_memory']:.2f} KB")
+    print(f"Average Current Memory: {averages['current_memory']:.2f} KB")
+    print(f"Average Temporary Memory: {averages['temporary_memory']:.2f} KB")
+    
+    return averages
+
+def simulate_astar_tree(start_node, goal_node, grid, n_sim_iterations=100):
+    """
+    Simulates the A* algorithm on a tree representation.
+    """
+    return simulate_astar("Tree", astar_tree_pathfind, start_node, goal_node, grid, n_sim_iterations)
+
+
+def simulate_astar_graph(start_node, goal_node, grid, n_sim_iterations=100):
+    """
+    Simulates the A* algorithm on a graph representation.
+    """
+    return simulate_astar("Graph", astar_graph_pathfind, start_node, goal_node, grid, n_sim_iterations)
+
+
+def main(): 
     #generate_obstacles(grid, obstacle_count = 5)
     maze_file_path = "common/mirror_maze_50x50_2.xlsx"
     cost_file_path = "common/node_costs_50x50.xlsx"
     start_node, goal_node, grid, grid_shape = read_grid(maze_file_path, cost_file_path)
-    
+
+
     # Ask the user which UCS version to run
     algorithm = input("Select A* version (tree/graph): ").strip().lower()
 
     if algorithm == "tree":
-        path, nodes_expanded = astar_tree_pathfind(start_node, goal_node, grid)
+        (path, nodes_expanded), metric = astar_tree_pathfind(start_node, goal_node, grid)
         algorithm_name = "A* Tree Search"
+        
+        print("\n\n######### TREE SIMULATION RESULTS #########")
+        simulate_astar_tree(start_node, goal_node, grid, n_sim_iterations=100)
+        
     elif algorithm == "graph":
-        path, nodes_expanded = astar_graph_pathfind(start_node, goal_node, grid)
+        (path, nodes_expanded), metric = astar_graph_pathfind(start_node, goal_node, grid)
         algorithm_name = "A* Graph Search"
+        
+        print("\n\n######### TREE SIMULATION RESULTS #########")
+        simulate_astar_tree(start_node, goal_node, grid, n_sim_iterations=100)
     else:
         print("Invalid choice! Exiting.")
         return
     
     visualize_grid(start_node, goal_node, grid, path, algorithm = algorithm_name)
+    
+    
 
 if __name__ == "__main__":
     main()

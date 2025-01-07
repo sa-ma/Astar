@@ -3,23 +3,10 @@ import time
 from common.visualization import visualize_grid
 from common.grid import read_grid
 from common.performance import track_performance
+from common.get_neighbors import get_neighbors
 
 def heuristic(node, goal):
     return abs(node.x - goal.x) + abs(node.y - goal.y) # Manhattan distance
-
-
-def get_neighbors(grid, node, grid_shape):
-    directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
-    rows, columns = grid_shape
-    neighbors = []
-    
-    for dx, dy in directions:
-        nx, ny = node.x + dx, node.y + dy
-        if 0 <= nx < rows and 0 <= ny < columns:
-            neighbor_node = grid[nx][ny]
-            if neighbor_node.is_walkable:
-                neighbors.append(neighbor_node)
-    return neighbors
 
 def reconstruct_path(node):
     path = []
@@ -31,7 +18,7 @@ def reconstruct_path(node):
     return path
 
 @track_performance
-def astar_tree_pathfind(start_node, goal_node, grid, grid_shape):
+def astar_tree_pathfind(start_node, goal_node, grid):
     nodes_expanded = 0
 
     # Priority queue for open set
@@ -59,8 +46,8 @@ def astar_tree_pathfind(start_node, goal_node, grid, grid_shape):
             return reconstruct_path(parent_node), nodes_expanded
 
         # Explore neighbors
-        for neighbor in get_neighbors(grid, parent_node, grid_shape):
-            new_cost = parent_node.cost + neighbor.cost + heuristic(neighbor, goal_node)
+        for neighbor, move_cost in get_neighbors(grid, parent_node):
+            new_cost = parent_node.cost + neighbor.cost + move_cost + heuristic(neighbor, goal_node)
 
             # Update neighbor only if it is not yet expanded
             if neighbor.state not in closed_set:
@@ -72,7 +59,7 @@ def astar_tree_pathfind(start_node, goal_node, grid, grid_shape):
     return [], nodes_expanded
 
 @track_performance
-def astar_graph_pathfind(start_node, goal_node, grid, grid_shape):
+def astar_graph_pathfind(start_node, goal_node, grid):
     nodes_expanded = 0
     
     open_set = []
@@ -93,8 +80,8 @@ def astar_graph_pathfind(start_node, goal_node, grid, grid_shape):
         
         closed_set[parent_node.state] = parent_node
         
-        for neighbor in get_neighbors(grid, parent_node, grid_shape):
-            new_cost = parent_node.cost + neighbor.cost + heuristic(neighbor, goal_node)
+        for neighbor, move_cost in get_neighbors(grid, parent_node):
+            new_cost = parent_node.cost + neighbor.cost + move_cost + heuristic(neighbor, goal_node)
             if neighbor.state not in closed_set and (neighbor.state not in best_cost or new_cost < best_cost[neighbor.state]):
                 neighbor.cost = new_cost
                 neighbor.parent = parent_node
@@ -103,10 +90,9 @@ def astar_graph_pathfind(start_node, goal_node, grid, grid_shape):
                 
     return [], nodes_expanded
 
-
 def main():    
     #generate_obstacles(grid, obstacle_count = 5)
-    maze_file_path = "common/online_maze.xlsx"
+    maze_file_path = "common/mirror_maze_50x50_2.xlsx"
     cost_file_path = "common/node_costs_50x50.xlsx"
     start_node, goal_node, grid, grid_shape = read_grid(maze_file_path, cost_file_path)
     
@@ -114,10 +100,10 @@ def main():
     algorithm = input("Select A* version (tree/graph): ").strip().lower()
 
     if algorithm == "tree":
-        path, nodes_expanded = astar_tree_pathfind(start_node, goal_node, grid, grid_shape)
+        path, nodes_expanded = astar_tree_pathfind(start_node, goal_node, grid)
         algorithm_name = "A* Tree Search"
     elif algorithm == "graph":
-        path, nodes_expanded = astar_graph_pathfind(start_node, goal_node, grid, grid_shape)
+        path, nodes_expanded = astar_graph_pathfind(start_node, goal_node, grid)
         algorithm_name = "A* Graph Search"
     else:
         print("Invalid choice! Exiting.")

@@ -3,7 +3,7 @@ import time
 import tracemalloc
 from common.grid import read_grid
 from common.visualization import visualize_grid
-from common.get_neighbors import get_neighbors  # Updated import statement
+from common.get_neighbors import get_neighbors
 
 
 def dfs_graph(start, goal, grid):
@@ -31,7 +31,7 @@ def dfs_graph(start, goal, grid):
             return path, nodes_expanded, end_time - start_time, peak - current
 
         # Explore neighbors
-        for neighbor, _ in get_neighbors(grid, current_node):  # Unpack neighbor and move_cost
+        for neighbor, _ in get_neighbors(grid, current_node):
             if neighbor.state not in visited and neighbor.is_walkable:
                 neighbor.parent = current_node
                 visited.add(neighbor.state)
@@ -139,18 +139,35 @@ def main():
         dfs = dfs_graph
         search_type = "DFS Graph Search"
 
-    # Run DFS
-    path, nodes_expanded, exec_time, memory_usage = dfs(start_node, goal_node, grid)
+    # Test over 100 runs
+    total_time = 0
+    total_memory = 0
+    total_nodes_expanded = 0
+    total_path_length = 0
+    num_runs = 1000
 
-    # Display performance metrics
-    print(f"Execution Time: {exec_time:.6f} seconds")
-    #print(f"Path: {path}")
-    print(f"Path Length: {len(path)}")
-    #print(f"Nodes Expanded: {nodes_expanded}")
-    print(f"Memory usage: {memory_usage / 1024:.2f} KB")
+    for _ in range(num_runs):
+        path, nodes_expanded, exec_time, memory_usage = dfs(start_node, goal_node, grid)
+        total_time += exec_time
+        total_memory += memory_usage
+        total_nodes_expanded += nodes_expanded
+        total_path_length += len(path)
+
+    # Calculate averages
+    avg_time = total_time / num_runs
+    avg_memory = total_memory / num_runs
+    avg_nodes_expanded = total_nodes_expanded / num_runs
+    avg_path_length = total_path_length / num_runs
+
+    # Display results
+    print(f"Results over {num_runs} runs:")
+    print(f"Average Execution Time: {avg_time:.6f} seconds")
+    print(f"Average Memory Usage: {avg_memory / 1024:.2f} KB")
+    print(f"Average Nodes Expanded: {avg_nodes_expanded:.2f}")
+    print(f"Average Path Length: {avg_path_length:.2f}")
 
     # Visualize the result
-    visualize_grid(start_node, goal_node, grid, path, algorithm=search_type)
+    #visualize_grid(start_node, goal_node, grid, path, algorithm=search_type)
 
 
 if __name__ == "__main__":

@@ -2,21 +2,8 @@ import heapq
 from common.grid import read_grid
 from common.visualization import visualize_grid
 from common.node import Node
+from common.get_neighbors import get_neighbors
 import time
-
-def get_neighbors(grid, node, grid_shape):
-    directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
-    rows, columns = grid_shape
-    neighbors = []
-    
-    for dx, dy in directions:
-        nx, ny = node.x + dx, node.y + dy
-        if 0 <= nx < rows and 0 <= ny < columns:
-            neighbor_node = grid[nx][ny]
-            if neighbor_node.is_walkable:
-                neighbors.append(neighbor_node)
-                
-    return neighbors
 
 def reconstruct_path(node):
     path = []

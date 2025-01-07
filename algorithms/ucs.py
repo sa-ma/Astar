@@ -98,6 +98,7 @@ def main():
     print(f"Execution Time: {ms_execution_time:.3f} ms")
     
     visualize_grid(start_node, goal_node, grid, path, algorithm = algorithm_name)
-
+    return [len(path), nodes_expanded, path[-1].cost if path else None, execution_time]
+    
 if __name__ == "__main__":
     main()

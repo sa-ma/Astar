@@ -3,13 +3,16 @@ import time
 import tracemalloc
 from common.grid import read_grid
 from common.visualization import visualize_grid
-from common.get_neighbors import get_neighbors
+from common.get_neighbors import get_neighbors  # Updated import statement
 
 
 def dfs_graph(start, goal, grid):
     """
     Depth-First (Graph) Search implementation.
     """
+    tracemalloc.start()
+    start_time = time.perf_counter()
+
     nodes_expanded = 0
     # Initialize stack and visited set
     stack = [start]
@@ -22,23 +25,32 @@ def dfs_graph(start, goal, grid):
         # Check if goal is found
         if current_node.state == goal.state:
             path = reconstruct_path(current_node)
-            return path, nodes_expanded
+            end_time = time.perf_counter()
+            current, peak = tracemalloc.get_traced_memory()
+            tracemalloc.stop()
+            return path, nodes_expanded, end_time - start_time, peak - current
 
         # Explore neighbors
-        for neighbor, _ in get_neighbors(grid, current_node):
+        for neighbor, _ in get_neighbors(grid, current_node):  # Unpack neighbor and move_cost
             if neighbor.state not in visited and neighbor.is_walkable:
                 neighbor.parent = current_node
                 visited.add(neighbor.state)
                 stack.append(neighbor)
 
     # If no path is found
-    return [], nodes_expanded
+    end_time = time.perf_counter()
+    current, peak = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+    return [], nodes_expanded, end_time - start_time, peak - current
 
 
 def dfs_tree(start, goal, grid):
     """
     Depth-First (Tree) Search implementation.
     """
+    tracemalloc.start()
+    start_time = time.perf_counter()
+
     nodes_expanded = 0
     # Reset parents
     for row in grid:
@@ -55,20 +67,24 @@ def dfs_tree(start, goal, grid):
         # Check if goal is found
         if current_node.state == goal.state:
             path = reconstruct_path(current_node)
-            return path, nodes_expanded
+            end_time = time.perf_counter()
+            current, peak = tracemalloc.get_traced_memory()
+            tracemalloc.stop()
+            return path, nodes_expanded, end_time - start_time, peak - current
 
         # Explore neighbors
-        for neighbor, _ in get_neighbors(grid, current_node):  # Unpack neighbor and move_cost
-            # If neighbor has no parent, it hasn't been visited yet in Tree Search
+        for neighbor, _ in get_neighbors(grid, current_node):
             if neighbor.is_walkable and neighbor.parent is None:
-                # Optionally skip going directly back to the parent
                 if current_node.parent is not None and neighbor == current_node.parent:
                     continue
                 neighbor.parent = current_node
                 stack.append(neighbor)
 
     # If no path is found
-    return [], nodes_expanded
+    end_time = time.perf_counter()
+    current, peak = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+    return [], nodes_expanded, end_time - start_time, peak - current
 
 
 def reconstruct_path(goal_node):
@@ -123,22 +139,15 @@ def main():
         dfs = dfs_graph
         search_type = "DFS Graph Search"
 
-    tracemalloc.start()
-    start_time = time.perf_counter()
-
     # Run DFS
-    path, nodes_expanded = dfs(start_node, goal_node, grid)
-
-    end_time = time.perf_counter()
-    current, peak = tracemalloc.get_traced_memory()
-    tracemalloc.stop()
+    path, nodes_expanded, exec_time, memory_usage = dfs(start_node, goal_node, grid)
 
     # Display performance metrics
-    print(f"Execution Time: {end_time-start_time:.6f} seconds")
+    print(f"Execution Time: {exec_time:.6f} seconds")
     #print(f"Path: {path}")
     print(f"Path Length: {len(path)}")
     #print(f"Nodes Expanded: {nodes_expanded}")
-    print(f"Memory usage: {(peak-current) / 1024:.2f} KB")
+    print(f"Memory usage: {memory_usage / 1024:.2f} KB")
 
     # Visualize the result
     visualize_grid(start_node, goal_node, grid, path, algorithm=search_type)

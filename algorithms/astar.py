@@ -19,6 +19,7 @@ def reconstruct_path(node):
 
 @track_performance
 def astar_tree_pathfind(start_node, goal_node, grid):
+    start_time = time.perf_counter()
     nodes_expanded = 0
 
     # Priority queue for open set
@@ -94,22 +95,53 @@ def main():
     #generate_obstacles(grid, obstacle_count = 5)
     maze_file_path = "common/mirror_maze_50x50_2.xlsx"
     cost_file_path = "common/node_costs_50x50.xlsx"
-    start_node, goal_node, grid, grid_shape = read_grid(maze_file_path, cost_file_path)
     
-    # Ask the user which UCS version to run
     algorithm = input("Select A* version (tree/graph): ").strip().lower()
-
-    if algorithm == "tree":
-        path, nodes_expanded = astar_tree_pathfind(start_node, goal_node, grid)
-        algorithm_name = "A* Tree Search"
-    elif algorithm == "graph":
-        path, nodes_expanded = astar_graph_pathfind(start_node, goal_node, grid)
-        algorithm_name = "A* Graph Search"
-    else:
+    
+    if algorithm not in ["tree", "graph"]:
         print("Invalid choice! Exiting.")
         return
+
+    runs = 100
+    total_path_length = 0
+    total_nodes_expanded = 0
+    total_execution_time = 0
+
+    for _ in range(runs):
+        start_node, goal_node, grid, grid_shape = read_grid(maze_file_path, cost_file_path)
+        if algorithm == "tree":
+            path, nodes_expanded, execution_time = astar_tree_pathfind(start_node, goal_node, grid)
+        elif algorithm == "graph":
+            path, nodes_expanded, execution_time = astar_graph_pathfind(start_node, goal_node, grid)
+
+        total_path_length += len(path)
+        total_nodes_expanded += nodes_expanded
+        total_execution_time += execution_time
+
+    avg_path_length = total_path_length / runs
+    avg_nodes_expanded = total_nodes_expanded / runs
+    avg_execution_time = total_execution_time / runs
+
+    print(f"Average Path Length: {avg_path_length}")
+    print(f"Average Nodes Expanded: {avg_nodes_expanded}")
+    print(f"Average Execution Time: {avg_execution_time * 1000:.3f} milliseconds")
     
-    visualize_grid(start_node, goal_node, grid, path, algorithm = algorithm_name)
+    # start_node, goal_node, grid, grid_shape = read_grid(maze_file_path, cost_file_path)
+    
+    # # Ask the user which UCS version to run
+    # algorithm = input("Select A* version (tree/graph): ").strip().lower()
+
+    # if algorithm == "tree":
+    #     path, nodes_expanded = astar_tree_pathfind(start_node, goal_node, grid)
+    #     algorithm_name = "A* Tree Search"
+    # elif algorithm == "graph":
+    #     path, nodes_expanded = astar_graph_pathfind(start_node, goal_node, grid)
+    #     algorithm_name = "A* Graph Search"
+    # else:
+    #     print("Invalid choice! Exiting.")
+    #     return
+    
+    #visualize_grid(start_node, goal_node, grid, path, algorithm = algorithm_name)
 
 if __name__ == "__main__":
     main()

@@ -3,7 +3,9 @@ from common.grid import read_grid
 from common.visualization import visualize_grid
 from common.node import Node
 from common.get_neighbors import get_neighbors
+from common.performance import track_performance
 import time
+import tracemalloc
 
 def reconstruct_path(node):
     path = []
@@ -63,6 +65,7 @@ def ucs_tree_pathfind(start_node, goal_node, grid):
         
         if parent_node.state == goal_node.state:
             execution_time = time.perf_counter() - start_time
+            current, peak = tracemalloc.get_traced_memory()
             return reconstruct_path(parent_node), nodes_expanded, execution_time
         
         for neighbor, move_cost in get_neighbors(grid, parent_node):
@@ -79,28 +82,34 @@ def main():
     #generate_obstacles(grid, obstacle_count = 5)
     maze_file_path = "common/mirror_maze_50x50_2.xlsx"
     cost_file_path = "common/node_costs_50x50.xlsx"
-    start_node, goal_node, grid, grid_shape = read_grid(maze_file_path, cost_file_path)
+    #start_node, goal_node, grid, grid_shape = read_grid(maze_file_path, cost_file_path)
     
-    # Ask the user which UCS version to run
     algorithm = input("Select UCS version (tree/graph): ").strip().lower()
     
-    if algorithm == "tree":
-        path, nodes_expanded, execution_time = ucs_tree_pathfind(start_node, goal_node, grid)
-        algorithm_name = "UCS Tree Search"
-    elif algorithm == "graph":
-        path, nodes_expanded, execution_time = ucs_graph_pathfind(start_node, goal_node, grid)
-        # path, nodes_expanded, execution_time = dfs_graph(start_node, goal_node, grid)
-        algorithm_name = "UCS Graph Search"
-    else:
+    if algorithm not in ["tree", "graph"]:
         print("Invalid choice! Exiting.")
         return
-    
-    print(f"UCS Path Length: {len(path)}")
+
+    runs = 1
+    total_execution_time = 0
+
+    for _ in range(runs):
+        start_node, goal_node, grid, grid_shape = read_grid(maze_file_path, cost_file_path)
+        if algorithm == "tree":
+            path, nodes_expanded, execution_time = ucs_graph_pathfind(start_node, goal_node, grid)
+        elif algorithm == "graph":
+            path, nodes_expanded, execution_time = ucs_tree_pathfind(start_node, goal_node, grid)
+
+        path_length = len(path)
+        total_execution_time += execution_time
+
+    avg_execution_time = total_execution_time / runs
+
+    print(f"Path Length: {path_length}")
     print(f"Nodes Expanded: {nodes_expanded}")
-    print(f"Total Path Cost: {path[-1].cost if path else None}")
-    print(f"Execution Time: {execution_time:.11f} seconds")
-    
-    visualize_grid(start_node, goal_node, grid, path, algorithm = algorithm_name)
+    print(f"Average Execution Time: {avg_execution_time * 1000:.3f} milliseconds")
+        
+    #visualize_grid(start_node, goal_node, grid, path, algorithm = algorithm_name)
 
 if __name__ == "__main__":
     main()

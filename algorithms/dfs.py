@@ -3,6 +3,7 @@ import time
 import tracemalloc
 from common.grid import read_grid
 from common.visualization import visualize_grid
+from common.get_neighbors import get_neighbors
 
 
 def dfs_graph(start, goal, grid):
@@ -24,7 +25,7 @@ def dfs_graph(start, goal, grid):
             return path, nodes_expanded
 
         # Explore neighbors
-        for neighbor in get_neighbors(current_node, grid):
+        for neighbor, _ in get_neighbors(grid, current_node):
             if neighbor.state not in visited and neighbor.is_walkable:
                 neighbor.parent = current_node
                 visited.add(neighbor.state)
@@ -57,7 +58,7 @@ def dfs_tree(start, goal, grid):
             return path, nodes_expanded
 
         # Explore neighbors
-        for neighbor in get_neighbors(current_node, grid):
+        for neighbor, _ in get_neighbors(grid, current_node):
             # If neighbor has no parent, it hasn't been visited yet in Tree Search
             if neighbor.is_walkable and neighbor.parent is None:
                 # Optionally skip going directly back to the parent
@@ -77,19 +78,6 @@ def reconstruct_path(goal_node):
         path.append(current)
         current = current.parent
     return path[::-1]
-
-
-def get_neighbors(node, grid):
-    rows, cols = len(grid), len(grid[0])
-    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
-    neighbors = []
-
-    for dx, dy in directions:
-        new_x, new_y = node.x + dx, node.y + dy
-        if 0 <= new_x < rows and 0 <= new_y < cols:
-            neighbors.append(grid[new_x][new_y])
-
-    return neighbors
 
 
 def main():

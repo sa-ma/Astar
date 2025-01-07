@@ -5,7 +5,7 @@ from common.visualization import visualize_grid
 from common.get_neighbors import get_neighbors
 
 
-def bfs_graph(start, goal, grid, grid_shape):
+def bfs_graph(start, goal, grid):
     start_time = time.time()
     nodes_expanded = 0
 
@@ -24,8 +24,8 @@ def bfs_graph(start, goal, grid, grid_shape):
             return path, nodes_expanded, execution_time
 
         # Explore neighbors
-        neighbors = get_neighbors(grid, current_node, grid_shape)
-        for neighbor in neighbors:
+        neighbors = get_neighbors(grid, current_node)
+        for neighbor, _ in neighbors:
             if neighbor.state not in visited and neighbor.is_walkable:
                 neighbor.parent = current_node
                 visited.add(neighbor.state)
@@ -35,7 +35,7 @@ def bfs_graph(start, goal, grid, grid_shape):
     return [], nodes_expanded, execution_time
 
 
-def bfs_tree(start, goal, grid, grid_shape):
+def bfs_tree(start, goal, grid):
 
     start_time = time.time()
     nodes_expanded = 0
@@ -57,7 +57,7 @@ def bfs_tree(start, goal, grid, grid_shape):
             path = reconstruct_path(current_node)
             return path, nodes_expanded, execution_time
 
-        for neighbor in get_neighbors(grid, current_node, grid_shape):
+        for neighbor, _ in get_neighbors(grid, current_node):
             if neighbor.is_walkable and neighbor.parent is None:
                 if current_node.parent is not None and neighbor == current_node.parent:
                     continue
@@ -79,15 +79,15 @@ def reconstruct_path(goal_node):
 def main():
     cost_file_path = "common/node_costs_50x50.xlsx"
     maze_file_path = "common/online_maze.xlsx"
-    start_node, goal_node, grid, grid_shape = read_grid(maze_file_path, cost_file_path)
+    start_node, goal_node, grid, _ = read_grid(maze_file_path, cost_file_path)
 
     algorithm = input("Select BFS version (tree/graph): ").strip().lower()
 
     if algorithm == "tree":
-        path, nodes_expanded, execution_time = bfs_tree(start_node, goal_node, grid, grid_shape)
+        path, nodes_expanded, execution_time = bfs_tree(start_node, goal_node, grid)
         algo_name = "BFS Tree Search"
     elif algorithm == "graph":
-        path, nodes_expanded, execution_time = bfs_graph(start_node, goal_node, grid, grid_shape)
+        path, nodes_expanded, execution_time = bfs_graph(start_node, goal_node, grid)
         algo_name = "BFS Graph Search"
     else:
         print("Invalid choice! Exiting.")
@@ -96,7 +96,7 @@ def main():
     # Performance metrics
     print(f"Path Length: {len(path)}")
     print(f"Nodes Expanded: {nodes_expanded}")
-    print(f"Execution Time: {execution_time:.4f} seconds")
+    print(f"Execution Time: {execution_time * 1000:.3f} milliseconds")
 
     visualize_grid(start_node, goal_node, grid, path, algorithm=algo_name)
 

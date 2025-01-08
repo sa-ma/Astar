@@ -108,6 +108,7 @@ def main():
         
         print("\n\n######### TREE SIMULATION RESULTS #########")
         simulate_bfs_tree(start_node, goal_node, grid, n_sim_iterations=100)
+        print(f"Nodes Expanded: {nodes_expanded}")
         
     elif algorithm == "graph":
         (path, nodes_expanded), metric = bfs_graph(start_node, goal_node, grid)

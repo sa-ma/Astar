@@ -109,6 +109,7 @@ def main():
         print("\n\n######### TREE SIMULATION RESULTS #########")
         simulate_bfs_tree(start_node, goal_node, grid, n_sim_iterations=100)
         print(f"Nodes Expanded: {nodes_expanded}")
+        print(f"Path Length: {len(path)}")
         
     elif algorithm == "graph":
         (path, nodes_expanded), metric = bfs_graph(start_node, goal_node, grid)
@@ -117,6 +118,7 @@ def main():
         print("\n\n######### GRAPH SIMULATION RESULTS #########")
         simulate_bfs_graph(start_node, goal_node, grid, n_sim_iterations=100)
         print(f"Nodes Expanded: {nodes_expanded}")
+        print(f"Path Length: {len(path)}")
     else:
         print("Invalid choice! Exiting.")
         return

@@ -148,6 +148,7 @@ def main():
         print("\n\n######### TREE SIMULATION RESULTS #########")
         simulate_astar_tree(start_node, goal_node, grid, n_sim_iterations=100)
         print(f"Nodes Expanded: {nodes_expanded}")
+        print(f"Path Length: {len(path)}")
         
     elif algorithm == "graph":
         (path, nodes_expanded), metric = astar_graph_pathfind(start_node, goal_node, grid)
@@ -155,6 +156,7 @@ def main():
         
         print("\n\n######### TREE SIMULATION RESULTS #########")
         simulate_astar_tree(start_node, goal_node, grid, n_sim_iterations=100)
+        print(f"Path Length: {len(path)}")
         print(f"Nodes Expanded: {nodes_expanded}")
         print()
     else:

@@ -4,6 +4,7 @@ from common.visualization import visualize_grid
 from common.node import Node
 from common.get_neighbors import get_neighbors
 import time
+import tracemalloc
 
 def reconstruct_path(node):
     path = []
@@ -15,6 +16,7 @@ def reconstruct_path(node):
     return path
 
 def ucs_graph_pathfind(start_node, goal_node, grid):
+    tracemalloc.start()
     start_time = time.perf_counter()
     nodes_expanded = 0
     
@@ -32,7 +34,9 @@ def ucs_graph_pathfind(start_node, goal_node, grid):
         
         if parent_node.state == goal_node.state:
             execution_time = time.perf_counter() - start_time
-            return reconstruct_path(parent_node), nodes_expanded, execution_time
+            current, peak = tracemalloc.get_traced_memory()
+            tracemalloc.stop()
+            return reconstruct_path(parent_node), nodes_expanded, execution_time, peak - current
         
         closed_set[parent_node.state] = parent_node
         
@@ -44,9 +48,12 @@ def ucs_graph_pathfind(start_node, goal_node, grid):
                 best_cost[neighbor.state] = new_cost
                 heapq.heappush(open_set, (neighbor.cost, neighbor))
     
-    return [], nodes_expanded, time.perf_counter() - start_time
+    current, peak = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+    return [], nodes_expanded, time.perf_counter() - start_time, peak - current
 
 def ucs_tree_pathfind(start_node, goal_node, grid):
+    tracemalloc.start()
     start_time = time.perf_counter()
     nodes_expanded = 0
     
@@ -63,7 +70,9 @@ def ucs_tree_pathfind(start_node, goal_node, grid):
         
         if parent_node.state == goal_node.state:
             execution_time = time.perf_counter() - start_time
-            return reconstruct_path(parent_node), nodes_expanded, execution_time
+            current, peak = tracemalloc.get_traced_memory()
+            tracemalloc.stop()
+            return reconstruct_path(parent_node), nodes_expanded, execution_time, peak - current
         
         for neighbor, move_cost in get_neighbors(grid, parent_node):
             new_cost = parent_node.cost + neighbor.cost + move_cost
@@ -72,35 +81,72 @@ def ucs_tree_pathfind(start_node, goal_node, grid):
                 neighbor.parent = parent_node
                 best_cost[neighbor.state] = new_cost
                 heapq.heappush(open_set, (neighbor.cost, neighbor))
-                
-    return [], nodes_expanded, time.perf_counter() - start_time
+    
+    current, peak = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+    return [], nodes_expanded, time.perf_counter() - start_time, peak - current
 
 def main():    
     #generate_obstacles(grid, obstacle_count = 5)
     maze_file_path = "common/mirror_maze_50x50_2.xlsx"
     cost_file_path = "common/node_costs_50x50.xlsx"
-    start_node, goal_node, grid, grid_shape = read_grid(maze_file_path, cost_file_path)
     
     # Ask the user which UCS version to run
     algorithm = input("Select UCS version (tree/graph): ").strip().lower()
     
-    if algorithm == "tree":
-        path, nodes_expanded, execution_time = ucs_tree_pathfind(start_node, goal_node, grid)
-        algorithm_name = "UCS Tree Search"
-    elif algorithm == "graph":
-        path, nodes_expanded, execution_time = ucs_graph_pathfind(start_node, goal_node, grid)
-        # path, nodes_expanded, execution_time = dfs_graph(start_node, goal_node, grid)
-        algorithm_name = "UCS Graph Search"
-    else:
+    # if algorithm == "tree":
+    #     path, nodes_expanded, execution_time = ucs_tree_pathfind(start_node, goal_node, grid)
+    #     algorithm_name = "UCS Tree Search"
+    # elif algorithm == "graph":
+    #     path, nodes_expanded, execution_time = ucs_graph_pathfind(start_node, goal_node, grid)
+    #     # path, nodes_expanded, execution_time = dfs_graph(start_node, goal_node, grid)
+    #     algorithm_name = "UCS Graph Search"
+    # else:
+    #     print("Invalid choice! Exiting.")
+    #     return
+    
+    # print(f"UCS Path Length: {len(path)}")
+    # print(f"Nodes Expanded: {nodes_expanded}")
+    # print(f"Total Path Cost: {path[-1].cost if path else None}")
+    # print(f"Execution Time: {execution_time:.11f} seconds")
+    
+    if algorithm not in ["tree", "graph"]:
         print("Invalid choice! Exiting.")
         return
+
+    runs = 100
+    total_path_length = 0
+    total_nodes_expanded = 0
+    total_execution_time = 0
+    total_path_cost = 0
+    total_memory_usage = 0
+
+    for _ in range(runs):
+        start_node, goal_node, grid, grid_shape = read_grid(maze_file_path, cost_file_path)
+        if algorithm == "tree":
+            path, nodes_expanded, execution_time, memory_usage = ucs_tree_pathfind(start_node, goal_node, grid)
+        elif algorithm == "graph":
+            path, nodes_expanded, execution_time, memory_usage = ucs_graph_pathfind(start_node, goal_node, grid)
+
+        total_path_length += len(path)
+        total_nodes_expanded += nodes_expanded
+        total_execution_time += execution_time
+        total_memory_usage += memory_usage
+        total_path_cost += path[-1].cost if path else None
+
+    avg_path_length = total_path_length / runs
+    avg_nodes_expanded = total_nodes_expanded / runs
+    avg_execution_time = total_execution_time / runs
+    avg_path_cost = total_path_cost / runs
+    avg_memory_usage = total_memory_usage / runs
+
+    print(f"Average Path Length: {avg_path_length}")
+    print(f"Average Path Cost: {avg_path_cost}")
+    print(f"Average Nodes Expanded: {avg_nodes_expanded}")
+    print(f"Average Execution Time: {avg_execution_time * 1000:.3f} milliseconds")
+    print(f"Average Memory Usage: {avg_memory_usage / 1024:.2f} KB")
     
-    print(f"UCS Path Length: {len(path)}")
-    print(f"Nodes Expanded: {nodes_expanded}")
-    print(f"Total Path Cost: {path[-1].cost if path else None}")
-    print(f"Execution Time: {execution_time:.11f} seconds")
-    
-    visualize_grid(start_node, goal_node, grid, path, algorithm = algorithm_name)
+    #visualize_grid(start_node, goal_node, grid, path, algorithm = algorithm_name)
 
 if __name__ == "__main__":
     main()

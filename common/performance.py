@@ -9,7 +9,7 @@ def track_performance(func):
         tracemalloc.start()
         start_time = time.time()
 
-        # Run the actual function
+        # Rugit git cn the actual function
         result = func(*args, **kwargs)
 
         # Stop memory tracking and execution time
@@ -26,11 +26,15 @@ def track_performance(func):
         }
 
         #Print or log the results
-        # print(f"Function: {func.__name__}")
-        # print(f"Execution Time: {execution_time:.4f} seconds")
-        # print(f"Peak Memory Usage: {peak / 1024:.2f} KB")
-        # print(f"Current Memory Usage: {current / 1024:.2f} KB")
-        # print(f"Temporary Memory Allocated and Released: {(peak - current) / 1024:.2f} KB")
+        
+        print(f"{' '.join(func.__name__.replace('_', ' ').title().split()[:2])} Path Length: {len(result[0])}")
+        print(f"Nodes Expanded: {result[1]}")
+        print(f"Execution Time: {execution_time:.4f} seconds")
+        print(f"Peak Memory Usage: {peak / 1024:.2f} KB")
+        print(f"Current Memory Usage: {current / 1024:.2f} KB")
+        print(f"Total Path Cost: {result[0][-1].cost if result[0] else None}")
+
+        #print(f"Temporary Memory Allocated and Released: {(peak - current) / 1024:.2f} KB")
         return result, performance_metrics
 
     return wrapper

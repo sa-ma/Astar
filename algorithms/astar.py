@@ -4,6 +4,7 @@ from common.grid import read_grid
 from common.performance import track_performance
 from common.get_neighbors import get_neighbors
 import statistics
+import pandas as pd
 
 def heuristic(node, goal):
     return abs(node.x - goal.x) + abs(node.y - goal.y) # Manhattan distance
@@ -115,14 +116,13 @@ def simulate_astar(name, astar_func, start_node, goal_node, grid, n_sim_iteratio
     print(f"Average Current Memory: {averages['current_memory']:.2f} KB")
     print(f"Average Temporary Memory: {averages['temporary_memory']:.2f} KB")
     
-    return averages
+    return averages, pd.DataFrame(results)
 
 def simulate_astar_tree(start_node, goal_node, grid, n_sim_iterations=100):
     """
     Simulates the A* algorithm on a tree representation.
     """
     return simulate_astar("Tree", astar_tree_pathfind, start_node, goal_node, grid, n_sim_iterations)
-
 
 def simulate_astar_graph(start_node, goal_node, grid, n_sim_iterations=100):
     """
@@ -145,15 +145,16 @@ def main():
         (path, nodes_expanded), metric = astar_tree_pathfind(start_node, goal_node, grid)
         algorithm_name = "A* Tree Search"
         
-        print("\n\n######### TREE SIMULATION RESULTS #########")
-        simulate_astar_tree(start_node, goal_node, grid, n_sim_iterations=100)
+        #print("\n\n######### TREE SIMULATION RESULTS #########")
+        #simulate_astar_tree(start_node, goal_node, grid, n_sim_iterations=100)
         
     elif algorithm == "graph":
         (path, nodes_expanded), metric = astar_graph_pathfind(start_node, goal_node, grid)
         algorithm_name = "A* Graph Search"
         
-        print("\n\n######### TREE SIMULATION RESULTS #########")
-        simulate_astar_tree(start_node, goal_node, grid, n_sim_iterations=100)
+        # print("\n\n######### TREE SIMULATION RESULTS #########")
+        # _, df = simulate_astar_tree(start_node, goal_node, grid, n_sim_iterations=100)
+        # print(df.describe())
     else:
         print("Invalid choice! Exiting.")
         return

@@ -28,12 +28,14 @@ def dfs_graph(start, goal, grid):
             end_time = time.perf_counter()
             current, peak = tracemalloc.get_traced_memory()
             tracemalloc.stop()
-            return path, nodes_expanded, end_time - start_time, peak - current
+            total_cost = calculate_total_path_cost(path)
+            return path, nodes_expanded, end_time - start_time, peak - current, total_cost
 
         # Explore neighbors
-        for neighbor, _ in get_neighbors(grid, current_node):
+        for neighbor, move_cost in get_neighbors(grid, current_node):
             if neighbor.state not in visited and neighbor.is_walkable:
                 neighbor.parent = current_node
+                neighbor.move_cost = move_cost
                 visited.add(neighbor.state)
                 stack.append(neighbor)
 
@@ -41,7 +43,7 @@ def dfs_graph(start, goal, grid):
     end_time = time.perf_counter()
     current, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
-    return [], nodes_expanded, end_time - start_time, peak - current
+    return [], nodes_expanded, end_time - start_time, peak - current, 0
 
 
 def dfs_tree(start, goal, grid):
@@ -70,21 +72,23 @@ def dfs_tree(start, goal, grid):
             end_time = time.perf_counter()
             current, peak = tracemalloc.get_traced_memory()
             tracemalloc.stop()
-            return path, nodes_expanded, end_time - start_time, peak - current
+            total_cost = calculate_total_path_cost(path)
+            return path, nodes_expanded, end_time - start_time, peak - current, total_cost
 
         # Explore neighbors
-        for neighbor, _ in get_neighbors(grid, current_node):
+        for neighbor, move_cost in get_neighbors(grid, current_node):
             if neighbor.is_walkable and neighbor.parent is None:
                 if current_node.parent is not None and neighbor == current_node.parent:
                     continue
                 neighbor.parent = current_node
+                neighbor.move_cost = move_cost
                 stack.append(neighbor)
 
     # If no path is found
     end_time = time.perf_counter()
     current, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
-    return [], nodes_expanded, end_time - start_time, peak - current
+    return [], nodes_expanded, end_time - start_time, peak - current, 0 
 
 
 def reconstruct_path(goal_node):
@@ -95,6 +99,16 @@ def reconstruct_path(goal_node):
         current = current.parent
     return path[::-1]
 
+def calculate_total_path_cost(path):
+    total_cost = 0
+    for i in range(1, len(path)):
+        node = path[i]
+        parent = path[i - 1]
+        # Cost of entering the node
+        total_cost += node.cost
+        # Movement cost from the parent to this node
+        total_cost += getattr(node, "move_cost", 0)  
+    return total_cost
 
 def main():
     # Grid selection
@@ -146,28 +160,38 @@ def main():
     total_path_length = 0
     num_runs = 1000
 
-    for _ in range(num_runs):
-        path, nodes_expanded, exec_time, memory_usage = dfs(start_node, goal_node, grid)
-        total_time += exec_time
-        total_memory += memory_usage
-        total_nodes_expanded += nodes_expanded
-        total_path_length += len(path)
+    # for _ in range(num_runs):
+    path, nodes_expanded, exec_time, memory_usage, path_cost = dfs(start_node, goal_node, grid)
+    total_time += exec_time
+    total_memory += memory_usage
+    total_nodes_expanded += nodes_expanded
+    total_path_length += len(path)
+    print(f"Start Node is: {start_node}")
+    print(f"Goal Node is: {goal_node}")
 
     # Calculate averages
-    avg_time = total_time / num_runs
-    avg_memory = total_memory / num_runs
-    avg_nodes_expanded = total_nodes_expanded / num_runs
-    avg_path_length = total_path_length / num_runs
+    # avg_time = total_time / num_runs
+    # avg_memory = total_memory / num_runs
+    # avg_nodes_expanded = total_nodes_expanded / num_runs
+    # avg_path_length = total_path_length / num_runs
 
     # Display results
-    print(f"Results over {num_runs} runs:")
-    print(f"Average Execution Time: {avg_time:.6f} seconds")
-    print(f"Average Memory Usage: {avg_memory / 1024:.2f} KB")
-    print(f"Average Nodes Expanded: {avg_nodes_expanded:.2f}")
-    print(f"Average Path Length: {avg_path_length:.2f}")
+    # print(f"Results over {num_runs} runs:")
+    # print(f"Average Execution Time: {avg_time:.6f} seconds")
+    # print(f"Average Memory Usage: {avg_memory / 1024:.2f} KB")
+    # print(f"Average Nodes Expanded: {avg_nodes_expanded:.2f}")
+    # print(f"Average Path Length: {avg_path_length:.2f}")
+    
+    #print(f"Results over {num_runs} runs:")
+    print(f" Execution Time: {exec_time:.6f} seconds")
+    print(f" Memory Usage: {memory_usage / 1024:.2f} KB")
+    print(f" Nodes Expanded: {nodes_expanded:.2f}")
+    print(f" Path Length: {len(path):.2f}")    
+    print(f"Path Cost: {path_cost}")
+    
 
     # Visualize the result
-    #visualize_grid(start_node, goal_node, grid, path, algorithm=search_type)
+    visualize_grid(start_node, goal_node, grid, path, algorithm=search_type)
 
 
 if __name__ == "__main__":

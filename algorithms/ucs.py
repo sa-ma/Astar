@@ -88,7 +88,7 @@ def ucs_tree_pathfind(start_node, goal_node, grid):
 
 def main():    
     #generate_obstacles(grid, obstacle_count = 5)
-    maze_file_path = "common/mirror_maze_50x50_2.xlsx"
+    maze_file_path = "common/empty_grid_50x50_start_center_goal_up.xlsx"
     cost_file_path = "common/node_costs_50x50.xlsx"
     
     # Ask the user which UCS version to run
@@ -114,25 +114,25 @@ def main():
         print("Invalid choice! Exiting.")
         return
 
-    runs = 100
+    runs = 1
     total_path_length = 0
     total_nodes_expanded = 0
     total_execution_time = 0
     total_path_cost = 0
     total_memory_usage = 0
 
-    for _ in range(runs):
-        start_node, goal_node, grid, grid_shape = read_grid(maze_file_path, cost_file_path)
-        if algorithm == "tree":
-            path, nodes_expanded, execution_time, memory_usage = ucs_tree_pathfind(start_node, goal_node, grid)
-        elif algorithm == "graph":
-            path, nodes_expanded, execution_time, memory_usage = ucs_graph_pathfind(start_node, goal_node, grid)
+    #for _ in range(runs):
+    start_node, goal_node, grid, grid_shape = read_grid(maze_file_path, cost_file_path)
+    if algorithm == "tree":
+        path, nodes_expanded, execution_time, memory_usage = ucs_tree_pathfind(start_node, goal_node, grid)
+    elif algorithm == "graph":
+        path, nodes_expanded, execution_time, memory_usage = ucs_graph_pathfind(start_node, goal_node, grid)
 
-        total_path_length += len(path)
-        total_nodes_expanded += nodes_expanded
-        total_execution_time += execution_time
-        total_memory_usage += memory_usage
-        total_path_cost += path[-1].cost if path else None
+    total_path_length += len(path)
+    total_nodes_expanded += nodes_expanded
+    total_execution_time += execution_time
+    total_memory_usage += memory_usage
+    total_path_cost += path[-1].cost if path else None
 
     avg_path_length = total_path_length / runs
     avg_nodes_expanded = total_nodes_expanded / runs
@@ -146,7 +146,7 @@ def main():
     print(f"Average Execution Time: {avg_execution_time * 1000:.3f} milliseconds")
     print(f"Average Memory Usage: {avg_memory_usage / 1024:.2f} KB")
     
-    #visualize_grid(start_node, goal_node, grid, path, algorithm = algorithm_name)
+    visualize_grid(start_node, goal_node, grid, path, algorithm = algorithm)
 
 if __name__ == "__main__":
     main()

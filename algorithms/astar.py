@@ -64,6 +64,7 @@ def astar_tree_pathfind(start_node, goal_node, grid):
 
 
 
+
 @track_performance
 def astar_graph_pathfind(start_node, goal_node, grid):
     nodes_expanded = 0
@@ -94,9 +95,13 @@ def astar_graph_pathfind(start_node, goal_node, grid):
 
         # Explore neighbors
         for neighbor, move_cost in get_neighbors(grid, parent_node):
-            tentative_cost = parent_node.cost + move_cost + neighbor.cost
+            if not neighbor.is_walkable:
+                continue
 
-            # Check if the neighbor is not in the closed set or has a better cost
+            # Tentative cost calculation
+            tentative_cost = parent_node.cost + move_cost
+
+            # Check if neighbor has a better cost or hasn't been visited
             if neighbor.state not in closed_set and (
                 neighbor.state not in best_cost or tentative_cost < best_cost[neighbor.state]
             ):
@@ -108,6 +113,21 @@ def astar_graph_pathfind(start_node, goal_node, grid):
 
     # If no path is found
     return [], nodes_expanded
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -163,13 +183,15 @@ def main():
     if algorithm == "tree":
         (path, total_cost), metric = astar_tree_pathfind(start_node, goal_node, grid)
         algorithm_name = "A* Tree Search"
-
+        #print(path)
+        
         #print("\n\n######### TREE SIMULATION RESULTS #########")
         #simulate_astar_tree(start_node, goal_node, grid, n_sim_iterations=100)
         
     elif algorithm == "graph":
         (path, nodes_expanded), metric = astar_graph_pathfind(start_node, goal_node, grid)
         algorithm_name = "A* Graph Search"
+        #print(f"Path Cost: {total_cost}")
         
         # print("\n\n######### TREE SIMULATION RESULTS #########")
         # _, df = simulate_astar_tree(start_node, goal_node, grid, n_sim_iterations=100)

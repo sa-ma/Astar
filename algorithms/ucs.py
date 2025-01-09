@@ -87,11 +87,28 @@ def ucs_tree_pathfind(start_node, goal_node, grid):
     return [], nodes_expanded, time.perf_counter() - start_time, peak - current
 
 def main():    
-    maze_file_path = "common/mirror_maze_50x50.xlsx"
+    #generate_obstacles(grid, obstacle_count = 5)
+    maze_file_path = "common/mirror_maze_50x50_2.xlsx"
     cost_file_path = "common/node_costs_50x50.xlsx"
     
     # Ask the user which UCS version to run
     algorithm = input("Select UCS version (tree/graph): ").strip().lower()
+    
+    # if algorithm == "tree":
+    #     path, nodes_expanded, execution_time = ucs_tree_pathfind(start_node, goal_node, grid)
+    #     algorithm_name = "UCS Tree Search"
+    # elif algorithm == "graph":
+    #     path, nodes_expanded, execution_time = ucs_graph_pathfind(start_node, goal_node, grid)
+    #     # path, nodes_expanded, execution_time = dfs_graph(start_node, goal_node, grid)
+    #     algorithm_name = "UCS Graph Search"
+    # else:
+    #     print("Invalid choice! Exiting.")
+    #     return
+    
+    # print(f"UCS Path Length: {len(path)}")
+    # print(f"Nodes Expanded: {nodes_expanded}")
+    # print(f"Total Path Cost: {path[-1].cost if path else None}")
+    # print(f"Execution Time: {execution_time:.11f} seconds")
     
     if algorithm not in ["tree", "graph"]:
         print("Invalid choice! Exiting.")
@@ -105,7 +122,7 @@ def main():
     total_memory_usage = 0
 
     for _ in range(runs):
-        start_node, goal_node, grid = read_grid(maze_file_path, cost_file_path)
+        start_node, goal_node, grid, grid_shape = read_grid(maze_file_path, cost_file_path)
         if algorithm == "tree":
             path, nodes_expanded, execution_time, memory_usage = ucs_tree_pathfind(start_node, goal_node, grid)
         elif algorithm == "graph":
@@ -117,11 +134,11 @@ def main():
         total_memory_usage += memory_usage
         total_path_cost += path[-1].cost if path else None
 
-        avg_path_length = total_path_length / runs
-        avg_nodes_expanded = total_nodes_expanded / runs
-        avg_execution_time = total_execution_time / runs
-        avg_path_cost = total_path_cost / runs
-        avg_memory_usage = total_memory_usage / runs
+    avg_path_length = total_path_length / runs
+    avg_nodes_expanded = total_nodes_expanded / runs
+    avg_execution_time = total_execution_time / runs
+    avg_path_cost = total_path_cost / runs
+    avg_memory_usage = total_memory_usage / runs
 
     print(f"Average Path Length: {avg_path_length}")
     print(f"Average Path Cost: {avg_path_cost}")
@@ -129,23 +146,7 @@ def main():
     print(f"Average Execution Time: {avg_execution_time * 1000:.3f} milliseconds")
     print(f"Average Memory Usage: {avg_memory_usage / 1024:.2f} KB")
     
-    visualize_grid(start_node, goal_node, grid, path, algorithm = algorithm)
+    #visualize_grid(start_node, goal_node, grid, path, algorithm = algorithm_name)
 
 if __name__ == "__main__":
     main()
-    
-# if algorithm == "tree":
-#     path, nodes_expanded, execution_time = ucs_tree_pathfind(start_node, goal_node, grid)
-#     algorithm_name = "UCS Tree Search"
-# elif algorithm == "graph":
-#     path, nodes_expanded, execution_time = ucs_graph_pathfind(start_node, goal_node, grid)
-#     # path, nodes_expanded, execution_time = dfs_graph(start_node, goal_node, grid)
-#     algorithm_name = "UCS Graph Search"
-# else:
-#     print("Invalid choice! Exiting.")
-#     return
-
-# print(f"UCS Path Length: {len(path)}")
-# print(f"Nodes Expanded: {nodes_expanded}")
-# print(f"Total Path Cost: {path[-1].cost if path else None}")
-# print(f"Execution Time: {execution_time:.11f} seconds")

@@ -94,22 +94,6 @@ def main():
     # Ask the user which UCS version to run
     algorithm = input("Select UCS version (tree/graph): ").strip().lower()
     
-    # if algorithm == "tree":
-    #     path, nodes_expanded, execution_time = ucs_tree_pathfind(start_node, goal_node, grid)
-    #     algorithm_name = "UCS Tree Search"
-    # elif algorithm == "graph":
-    #     path, nodes_expanded, execution_time = ucs_graph_pathfind(start_node, goal_node, grid)
-    #     # path, nodes_expanded, execution_time = dfs_graph(start_node, goal_node, grid)
-    #     algorithm_name = "UCS Graph Search"
-    # else:
-    #     print("Invalid choice! Exiting.")
-    #     return
-    
-    # print(f"UCS Path Length: {len(path)}")
-    # print(f"Nodes Expanded: {nodes_expanded}")
-    # print(f"Total Path Cost: {path[-1].cost if path else None}")
-    # print(f"Execution Time: {execution_time:.11f} seconds")
-    
     if algorithm not in ["tree", "graph"]:
         print("Invalid choice! Exiting.")
         return
@@ -146,7 +130,7 @@ def main():
     print(f"Average Execution Time: {avg_execution_time * 1000:.3f} milliseconds")
     print(f"Average Memory Usage: {avg_memory_usage / 1024:.2f} KB")
     
-    #visualize_grid(start_node, goal_node, grid, path, algorithm = algorithm_name)
+    visualize_grid(start_node, goal_node, grid, path, algorithm)
 
 if __name__ == "__main__":
     main()

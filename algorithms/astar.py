@@ -23,46 +23,31 @@ def reconstruct_path(node):
 def astar_tree_pathfind(start_node, goal_node, grid):
     nodes_expanded = 0
 
-    open_set = []  # Priority queue for the open set
-    closed_set = set()  # Set to track expanded nodes
+    open_set = []
+    best_cost = {}
 
-    # Initialize the starting node
     start_node.cost = 0
     heapq.heappush(open_set, (0, start_node))
+    best_cost[start_node.state] = 0
 
     while open_set:
         nodes_expanded += 1
         _, parent_node = heapq.heappop(open_set)
 
-        # Skip if the node has already been expanded
-        if (parent_node.x, parent_node.y) in closed_set:
-            continue
+        if parent_node.state == goal_node.state:
+            path = reconstruct_path(parent_node)
+            return path, nodes_expanded
 
-        # Mark the node as expanded
-        closed_set.add((parent_node.x, parent_node.y))
-
-        # Check if the goal is reached
-        if parent_node.x == goal_node.x and parent_node.y == goal_node.y:
-            return reconstruct_path(parent_node), nodes_expanded
-
-        # Explore neighbors
         for neighbor, move_cost in get_neighbors(grid, parent_node):
-            if not neighbor.is_walkable:
-                continue
-
-            new_cost = parent_node.cost + move_cost
-
-            # Update neighbor cost and re-add to open set if cost is lower
-            if (neighbor.x, neighbor.y) not in closed_set or new_cost < neighbor.cost:
+            new_cost = parent_node.cost + neighbor.cost + move_cost
+            if neighbor.state not in best_cost or new_cost < best_cost[neighbor.state]:
                 neighbor.cost = new_cost
                 neighbor.parent = parent_node
+                best_cost[neighbor.state] = new_cost
                 priority = new_cost + heuristic(neighbor, goal_node)
                 heapq.heappush(open_set, (priority, neighbor))
 
-    # If no path is found
     return [], nodes_expanded
-
-
 
 
 @track_performance
@@ -99,7 +84,7 @@ def astar_graph_pathfind(start_node, goal_node, grid):
                 continue
 
             # Tentative cost calculation
-            tentative_cost = parent_node.cost + move_cost
+            tentative_cost = parent_node.cost + neighbor.cost + move_cost
 
             # Check if neighbor has a better cost or hasn't been visited
             if neighbor.state not in closed_set and (
@@ -113,22 +98,6 @@ def astar_graph_pathfind(start_node, goal_node, grid):
 
     # If no path is found
     return [], nodes_expanded
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -181,7 +150,7 @@ def main():
     algorithm = input("Select A* version (tree/graph): ").strip().lower()
 
     if algorithm == "tree":
-        (path, total_cost), metric = astar_tree_pathfind(start_node, goal_node, grid)
+        (path, nodes_expanded), metric = astar_tree_pathfind(start_node, goal_node, grid)
         algorithm_name = "A* Tree Search"
         #print(path)
         
@@ -192,6 +161,7 @@ def main():
         (path, nodes_expanded), metric = astar_graph_pathfind(start_node, goal_node, grid)
         algorithm_name = "A* Graph Search"
         #print(f"Path Cost: {total_cost}")
+        #print(path)
         
         # print("\n\n######### TREE SIMULATION RESULTS #########")
         # _, df = simulate_astar_tree(start_node, goal_node, grid, n_sim_iterations=100)

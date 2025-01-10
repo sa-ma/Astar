@@ -88,8 +88,8 @@ def ucs_tree_pathfind(start_node, goal_node, grid):
 
 def main():    
     #generate_obstacles(grid, obstacle_count = 5)
-    maze_file_path = "common/mirror_maze_50x50_2.xlsx"
-    cost_file_path = "common/node_costs_50x50.xlsx"
+    maze_file_path = "common/grids/mirror_maze_50x50_2.xlsx"
+    cost_file_path = "common/grids/node_costs_50x50.xlsx"
     
     # Ask the user which UCS version to run
     algorithm = input("Select UCS version (tree/graph): ").strip().lower()
@@ -98,7 +98,7 @@ def main():
         print("Invalid choice! Exiting.")
         return
 
-    runs = 100
+    runs = 1
     total_path_length = 0
     total_nodes_expanded = 0
     total_execution_time = 0

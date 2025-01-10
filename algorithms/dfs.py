@@ -112,7 +112,7 @@ def calculate_total_path_cost(path):
 
 def main():
     # Grid selection
-    excel_files = [f for f in os.listdir("common") if f.endswith(".xlsx")]
+    excel_files = [f for f in os.listdir("common/grids") if f.endswith(".xlsx")]
 
     if not excel_files:
         print("No .xlsx files found in the 'common' folder.")
@@ -128,13 +128,13 @@ def main():
         try:
             choice_index = int(choice)
             chosen_file = excel_files[choice_index]
-            chosen_path = os.path.join("common", chosen_file)
+            chosen_path = os.path.join("common/grids", chosen_file)
 
             print(f"You chose: {chosen_path}")
         except (ValueError, IndexError):
             print("Invalid choice!")
 
-    cost_file_path = "common/node_costs_50x50.xlsx"
+    cost_file_path = "common/grids/node_costs_50x50.xlsx"
     start_node, goal_node, grid, grid_shape = read_grid(chosen_path, cost_file_path)
 
     # Ask the user which algorithm to run

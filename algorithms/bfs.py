@@ -3,9 +3,8 @@ from common.grid import read_grid
 from common.visualization import visualize_grid
 from common.get_neighbors import get_neighbors
 from common.performance import track_performance
-import statistics
 
-#@track_performance
+@track_performance
 def bfs_graph(start, goal, grid):
     nodes_expanded = 0
 
@@ -32,7 +31,7 @@ def bfs_graph(start, goal, grid):
 
     return [], nodes_expanded, 0
 
-#@track_performance
+@track_performance
 def bfs_tree(start, goal, grid):
     nodes_expanded = 0
 
@@ -82,66 +81,27 @@ def calculate_total_path_cost(path):
         total_cost += getattr(node, "move_cost", 0)  
     return total_cost
 
-def simulate_bfs(name, bfs_func, start_node, goal_node, grid, n_sim_iterations=1):
-    results = []
-
-    for other in range(n_sim_iterations):
-        other, metrics = bfs_func(start_node, goal_node, grid)
-        results.append(metrics)
-
-    averages = {
-        "execution_time": statistics.mean(r["execution_time"] for r in results),
-        "peak_memory": statistics.mean(r["peak_memory"] for r in results),
-        "current_memory": statistics.mean(r["current_memory"] for r in results),
-        "temporary_memory": statistics.mean(r["temporary_memory"] for r in results),
-    }
-
-    print(f"######### {name.upper()} AVERAGES AFTER {n_sim_iterations} ITERATIONS #########")
-    print(f"Average Execution Time: {averages['execution_time']:.4f} seconds")
-    print(f"Average Peak Memory: {averages['peak_memory']:.2f} KB")
-    print(f"Average Current Memory: {averages['current_memory']:.2f} KB")
-    print(f"Average Temporary Memory: {averages['temporary_memory']:.2f} KB")
-    
-    return other
-    return averages
-
-def simulate_bfs_tree(start_node, goal_node, grid, n_sim_iterations=1):
-    return simulate_bfs("Tree", bfs_tree, start_node, goal_node, grid, n_sim_iterations)
-
-def simulate_bfs_graph(start_node, goal_node, grid, n_sim_iterations=1):
-    return simulate_bfs("Graph", bfs_graph, start_node, goal_node, grid, n_sim_iterations)
-
 def main():
-    cost_file_path = "common/node_costs_50x50.xlsx"
-    maze_file_path = "common/online_maze.xlsx"
+    cost_file_path = "common/grids/node_costs_50x50.xlsx"
+    maze_file_path = "common/grids/mirror_maze_50x50.xlsx"
     start_node, goal_node, grid, _ = read_grid(maze_file_path, cost_file_path)
 
     algorithm = input("Select BFS version (tree/graph): ").strip().lower()
 
     if algorithm == "tree":
-        path, nodes_expanded, path_cost = bfs_tree(start_node, goal_node, grid)
+        results = bfs_tree(start_node, goal_node, grid)
         algorithm_name = "BFS Tree Search"
         
-        print("\n\n######### TREE SIMULATION RESULTS #########")
-        #simulate_bfs_tree(start_node, goal_node, grid, n_sim_iterations=1)
-        print(f"Nodes Expanded: {nodes_expanded}")
-        print(f"Path Length: {len(path)}")
-        print(f"Path Cost: {path_cost}")
-        
     elif algorithm == "graph":
-        path, nodes_expanded, path_cost = bfs_graph(start_node, goal_node, grid)
+        results = bfs_graph(start_node, goal_node, grid)
         algorithm_name = "BFS Graph Search"
-        
-        print("\n\n######### GRAPH SIMULATION RESULTS #########")
-        #simulate_bfs_graph(start_node, goal_node, grid, n_sim_iterations=1)
-        print(f"Nodes Expanded: {nodes_expanded}")
-        print(f"Path Length: {len(path)}")
-        print(f"Path Cost: {path_cost}")
+
     else:
         print("Invalid choice! Exiting.")
         return
 
-    visualize_grid(start_node, goal_node, grid, path, algorithm=algorithm_name)
+    path = results[0][0]
+    visualize_grid(start_node, goal_node, grid, path , algorithm=algorithm_name)
 
 if __name__ == "__main__":
     main()

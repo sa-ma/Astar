@@ -99,6 +99,7 @@ def reconstruct_path(goal_node):
         current = current.parent
     return path[::-1]
 
+
 def calculate_total_path_cost(path):
     total_cost = 0
     for i in range(1, len(path)):
@@ -109,6 +110,7 @@ def calculate_total_path_cost(path):
         # Movement cost from the parent to this node
         total_cost += getattr(node, "move_cost", 0)  
     return total_cost
+
 
 def main():
     # Grid selection
@@ -153,42 +155,33 @@ def main():
         dfs = dfs_graph
         search_type = "DFS Graph Search"
 
-    # Test over 100 runs
+    # Test over num_runs
     total_time = 0
     total_memory = 0
     total_nodes_expanded = 0
     total_path_length = 0
-    num_runs = 1000
+    num_runs = 100
 
-    # for _ in range(num_runs):
-    path, nodes_expanded, exec_time, memory_usage, path_cost = dfs(start_node, goal_node, grid)
-    total_time += exec_time
-    total_memory += memory_usage
-    total_nodes_expanded += nodes_expanded
-    total_path_length += len(path)
-    print(f"Start Node is: {start_node}")
-    print(f"Goal Node is: {goal_node}")
+    for _ in range(num_runs):
+        path, nodes_expanded, exec_time, memory_usage, path_cost = dfs(start_node, goal_node, grid)
+        total_time += exec_time
+        total_memory += memory_usage
+        total_nodes_expanded += nodes_expanded
+        total_path_length += len(path)
 
     # Calculate averages
-    # avg_time = total_time / num_runs
-    # avg_memory = total_memory / num_runs
-    # avg_nodes_expanded = total_nodes_expanded / num_runs
-    # avg_path_length = total_path_length / num_runs
+    avg_time = total_time / num_runs
+    avg_memory = total_memory / num_runs
+    avg_nodes_expanded = total_nodes_expanded / num_runs
+    avg_path_length = total_path_length / num_runs
 
     # Display results
-    # print(f"Results over {num_runs} runs:")
-    # print(f"Average Execution Time: {avg_time:.6f} seconds")
-    # print(f"Average Memory Usage: {avg_memory / 1024:.2f} KB")
-    # print(f"Average Nodes Expanded: {avg_nodes_expanded:.2f}")
-    # print(f"Average Path Length: {avg_path_length:.2f}")
-    
-    #print(f"Results over {num_runs} runs:")
-    print(f" Execution Time: {exec_time:.6f} seconds")
-    print(f" Memory Usage: {memory_usage / 1024:.2f} KB")
-    print(f" Nodes Expanded: {nodes_expanded:.2f}")
-    print(f" Path Length: {len(path):.2f}")    
-    print(f"Path Cost: {path_cost}")
-    
+    print(f"Results over {num_runs} runs:")
+    print(f"Average Execution Time: {avg_time:.6f} seconds")
+    print(f"Average Memory Usage: {avg_memory / 1024:.2f} KB")
+    print(f"Average Nodes Expanded: {avg_nodes_expanded:.2f}")
+    print(f"Average Path Length: {avg_path_length:.2f}")
+    print(f"Average Path Cost: {path_cost}")
 
     # Visualize the result
     visualize_grid(start_node, goal_node, grid, path, algorithm=search_type)

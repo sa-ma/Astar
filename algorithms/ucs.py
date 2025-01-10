@@ -1,7 +1,6 @@
 import heapq
 from common.grid import read_grid
 from common.visualization import visualize_grid
-from common.node import Node
 from common.get_neighbors import get_neighbors
 import time
 import tracemalloc
@@ -66,7 +65,7 @@ def ucs_tree_pathfind(start_node, goal_node, grid):
     
     while open_set:
         nodes_expanded += 1
-        current_cost, parent_node = heapq.heappop(open_set)
+        _, parent_node = heapq.heappop(open_set)
         
         if parent_node.state == goal_node.state:
             execution_time = time.perf_counter() - start_time
@@ -87,8 +86,7 @@ def ucs_tree_pathfind(start_node, goal_node, grid):
     return [], nodes_expanded, time.perf_counter() - start_time, peak - current
 
 def main():    
-    #generate_obstacles(grid, obstacle_count = 5)
-    maze_file_path = "common/grids/mirror_maze_50x50_2.xlsx"
+    maze_file_path = "common/grids/mirror_maze_50x50.xlsx"
     cost_file_path = "common/grids/node_costs_50x50.xlsx"
     
     # Ask the user which UCS version to run
@@ -98,7 +96,7 @@ def main():
         print("Invalid choice! Exiting.")
         return
 
-    runs = 1
+    runs = 100
     total_path_length = 0
     total_nodes_expanded = 0
     total_execution_time = 0
@@ -106,7 +104,7 @@ def main():
     total_memory_usage = 0
 
     for _ in range(runs):
-        start_node, goal_node, grid, grid_shape = read_grid(maze_file_path, cost_file_path)
+        start_node, goal_node, grid, _ = read_grid(maze_file_path, cost_file_path)
         if algorithm == "tree":
             path, nodes_expanded, execution_time, memory_usage = ucs_tree_pathfind(start_node, goal_node, grid)
         elif algorithm == "graph":

@@ -141,8 +141,8 @@ def simulate_astar_graph(start_node, goal_node, grid, n_sim_iterations=100):
 
 def main(): 
     #generate_obstacles(grid, obstacle_count = 5)
-    maze_file_path = "common/mirror_maze_50x50.xlsx"
-    cost_file_path = "common/node_costs_50x50.xlsx"
+    maze_file_path = "common/grids/mirror_maze_50x50.xlsx"
+    cost_file_path = "common/grids/node_costs_50x50.xlsx"
     start_node, goal_node, grid, grid_shape = read_grid(maze_file_path, cost_file_path)
 
 
